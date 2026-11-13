@@ -1,0 +1,28 @@
+/*
+ * Design tokens. Change the look of the whole site from here.
+ *
+ * Palette: cool off-white studio, near-black ink, one accent (signal red) used
+ * only for pins and the bag counter.
+ * Radius rule: interactive controls are full pills, images and rows use --radius.
+ */
+:root {
+  --bg: #f1f1ef;
+  --surface: #fafaf9;
+  --ink: #151517;
+  --muted: #66666b;
+  --line: #d9d9d5;
+  --accent: #c63a18;
+  --on-accent: #fafaf9;
+
+  --radius: 12px;
+  --pill: 999px;
+
+  --font: 'Geist Variable', system-ui, sans-serif;
+
+  --ease: cubic-bezier(0.22, 0.8, 0.2, 1);
+  --slide: 720ms; /* how long a look takes to walk one slot */
+  --quick: 220ms;
+
+  --header-h: 64px;
+  --gutter: clamp(16px, 3vw, 40px);
+}

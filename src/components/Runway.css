@@ -1,0 +1,467 @@
+/*
+ * Layout: the stage fills the left, the product rail sits on the right.
+ * The intro and the controls are laid over the stage's top and bottom edges.
+ */
+.runway {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-rows: auto 1fr auto;
+  height: calc(100dvh - var(--header-h));
+  min-height: 600px;
+}
+
+.runway__intro {
+  grid-area: 1 / 1;
+  z-index: 10;
+  padding: 36px var(--gutter) 0;
+  pointer-events: none; /* figures underneath stay clickable */
+  animation: rise 520ms var(--ease) backwards;
+}
+
+.runway__title {
+  font-size: clamp(36px, 4.6vw, 68px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.runway__title--look {
+  font-size: clamp(28px, 3vw, 44px);
+}
+
+.runway__sub {
+  margin-top: 14px;
+  max-width: 46ch;
+  color: var(--muted);
+}
+
+.runway__eyebrow {
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- Stage ---------- */
+
+.runway__stage {
+  grid-area: 1 / 1 / -1 / 2;
+  position: relative;
+  overflow: hidden;
+  container-type: size; /* lets figures size and place themselves in cqw / cqh */
+  touch-action: pan-y; /* sideways drags change look, vertical drags still scroll */
+  cursor: grab;
+  user-select: none;
+  background: radial-gradient(90% 34% at 50% 100%, var(--surface), transparent);
+
+  /* Where a look that wraps around the loop walks in from (the right by default). */
+  --enter-x: 40;
+  --enter-s: 0.7;
+}
+
+/*
+ * One model. Each slot sets five numbers:
+ *   --x     horizontal offset from stage centre, in % of stage width
+ *   --s     scale (left side is nearer the camera, right side is further away)
+ *   --blur  depth-of-field blur
+ *   --o     opacity
+ *   --z     stacking order (nearer the camera sits on top)
+ */
+.figure {
+  position: absolute;
+  left: 50%;
+  bottom: 13cqh;
+  height: min(66cqh, 46cqw);
+  aspect-ratio: 5 / 13;
+  transform-origin: 50% 100%;
+  /* --px / --py are the pointer position (-1..1), set by Runway.tsx.
+     Nearer looks (bigger --z) shift more, which is what sells the depth. */
+  transform: translate(
+      calc(-50% + var(--x) * 1cqw - var(--px, 0) * (var(--z) + 1) * 0.55cqw),
+      calc(var(--py, 0) * (var(--z) + 1) * -0.18cqh)
+    )
+    scale(var(--s));
+  filter: blur(var(--blur));
+  opacity: var(--o);
+  z-index: var(--z);
+  /* blur is animated on purpose: the depth-of-field shift is the whole effect */
+  transition:
+    transform var(--slide) var(--ease),
+    filter var(--slide) var(--ease),
+    opacity var(--slide) var(--ease),
+    visibility 0s;
+}
+
+.figure[data-slot='-3'] { --x: -66; --s: 1.1;  --blur: 10px;  --o: 0;    --z: 6; }
+.figure[data-slot='-2'] { --x: -43; --s: 1.04; --blur: 5px;   --o: 0.85; --z: 5; }
+.figure[data-slot='-1'] { --x: -23; --s: 1;    --blur: 1.2px; --o: 1;    --z: 4; }
+.figure[data-slot='0']  { --x: -2;  --s: 1.1;  --blur: 0px;   --o: 1;    --z: 3; }
+.figure[data-slot='1']  { --x: 18;  --s: 0.86; --blur: 0px;   --o: 1;    --z: 2; }
+.figure[data-slot='2']  { --x: 31;  --s: 0.76; --blur: 1.5px; --o: 0.9;  --z: 1; }
+.figure[data-slot='3']  { --x: 40;  --s: 0.7;  --blur: 6px;   --o: 0;    --z: 0; }
+
+.figure[data-slot='-3'],
+.figure[data-slot='3'] {
+  pointer-events: none;
+}
+
+/* A look that wrapped around the loop walks in from off stage instead of sliding across it. */
+.figure[data-enter] {
+  transition: none;
+  animation: walk-in var(--slide) var(--ease);
+}
+
+.figure[data-enter='left'] {
+  --enter-x: -66;
+  --enter-s: 1.1;
+}
+
+@keyframes walk-in {
+  from {
+    transform: translateX(calc(-50% + var(--enter-x) * 1cqw)) scale(var(--enter-s));
+    filter: blur(10px);
+    opacity: 0;
+  }
+}
+
+/* Soft contact shadow on the studio floor. */
+.figure::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 -2.5% 0;
+  height: 6%;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgb(21 21 23 / 0.26), transparent);
+}
+
+.figure__hit {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius);
+}
+
+.figure__hit img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  transition: transform 400ms var(--ease);
+}
+
+/* The turntable (Turntable.tsx) or 3D model (Model3D.tsx) lies exactly over the image and takes over once loaded. */
+.figure__model {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  opacity: 0;
+  touch-action: pan-y; /* a sideways finger drag turns the model, up / down still scrolls */
+}
+
+.figure__model:active {
+  cursor: grabbing;
+}
+
+.figure__model[data-ready] {
+  opacity: 1;
+}
+
+.figure__hit:has(.figure__model[data-ready]) img:not(.figure__model) {
+  visibility: hidden;
+}
+
+.figure:not([data-slot='0']) .figure__hit:hover > * {
+  transform: translateY(-1%);
+}
+
+/* Page load: the line-up fades in out of a blur. */
+.runway[data-ready='false'] .figure {
+  opacity: 0;
+  filter: blur(16px);
+}
+
+/* Detail view: everyone but the centre look steps back. */
+.runway[data-mode='detail'] .figure:not([data-slot='0']) {
+  opacity: 0;
+  filter: blur(18px);
+  pointer-events: none;
+  visibility: hidden; /* also takes them out of the tab order */
+  transition-delay: 0s, 0s, 0s, var(--slide);
+}
+
+/* ---------- Pins ---------- */
+
+/*
+ * Each pin has a place on the model: --x (left / right of centre), --y (down
+ * from the top) and --z (in front of centre), all in percent of the image.
+ * --yaw is the angle the model is turned to, set by Turntable.tsx or Model3D.tsx. Turning
+ * the model swings the pin around the centre line, and a pin that ends up on
+ * the far side fades out.
+ */
+.figure__pins > li {
+  position: absolute;
+  left: calc(50% + (var(--x) * cos(var(--yaw, 0rad)) + var(--z) * sin(var(--yaw, 0rad))) * 1%);
+  top: calc(var(--y) * 1%);
+  /* ponytail: a faded pin can still be clicked; toggle visibility from JS if that ever matters */
+  opacity: clamp(0, (var(--z) * cos(var(--yaw, 0rad)) - var(--x) * sin(var(--yaw, 0rad))) * 0.25 + 1, 1);
+  translate: -50% -50%;
+  animation: pin-in 420ms var(--ease) backwards;
+  animation-delay: calc(var(--i) * 90ms + 260ms);
+}
+
+.pin {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--pill);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow:
+    0 0 0 3px var(--surface),
+    0 6px 16px rgb(21 21 23 / 0.22);
+  transition: transform var(--quick) var(--ease);
+}
+
+.pin:hover,
+.pin[aria-pressed='true'] {
+  transform: scale(1.14);
+}
+
+.pin__tip {
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  translate: 0 -50%;
+  padding: 7px 14px;
+  border-radius: var(--pill);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity var(--quick),
+    transform var(--quick) var(--ease);
+}
+
+.pin__tip b {
+  margin-left: 10px;
+  font-weight: 500;
+  opacity: 0.65;
+}
+
+li:hover > .pin__tip,
+.pin:focus-visible + .pin__tip,
+.pin[aria-pressed='true'] + .pin__tip {
+  opacity: 1;
+  transform: none;
+}
+
+.runway__hint {
+  position: absolute;
+  inset: auto 0 5cqh;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  animation: rise 520ms var(--ease) 500ms backwards;
+}
+
+/* ---------- Controls ---------- */
+
+.runway__controls {
+  grid-area: 3 / 1;
+  z-index: 10;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-height: 84px;
+  padding: 0 var(--gutter) 20px;
+  pointer-events: none;
+}
+
+.runway__controls > * {
+  pointer-events: auto;
+}
+
+.runway__arrow,
+.runway__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: none;
+  height: 40px;
+  min-width: 40px;
+  border-radius: var(--pill);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 14px;
+  transition: transform var(--quick) var(--ease);
+}
+
+.runway__back {
+  padding: 0 18px 0 14px;
+}
+
+.runway__arrow:active,
+.runway__back:active {
+  transform: scale(0.94);
+}
+
+.progress {
+  display: flex;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.progress__step {
+  display: block;
+  width: 34px;
+  padding: 10px 0 0;
+  text-align: left;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  /* ponytail: animates width (layout) on six tiny items; switch to scaleX if this list ever grows */
+  transition: width 480ms var(--ease);
+}
+
+.progress__step[aria-current] {
+  width: 150px;
+  color: var(--ink);
+}
+
+.progress__bar {
+  display: block;
+  height: 2px;
+  border-radius: var(--pill);
+  background: var(--line);
+  transition: background-color 480ms;
+}
+
+.progress__step:hover .progress__bar,
+.progress__step[aria-current] .progress__bar {
+  background: var(--ink);
+}
+
+.progress__label {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  white-space: nowrap;
+}
+
+.progress__name {
+  font-weight: 500;
+  animation: rise 420ms var(--ease) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .runway__stage {
+    --px: 0 !important;
+    --py: 0 !important;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes pin-in {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+}
+
+/* ---------- Tablet and phone: rail drops below, three looks on stage ---------- */
+
+@media (max-width: 899px) {
+  .runway {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(420px, 64dvh) auto auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .runway__intro {
+    padding-top: 24px;
+  }
+
+  .runway__stage {
+    grid-area: 2 / 1;
+    background: none; /* the floor glow would show a seam above the controls */
+    --enter-x: 74;
+    --enter-s: 0.74;
+  }
+
+  .runway__controls {
+    grid-area: 3 / 1;
+    padding-top: 12px;
+  }
+
+  .figure {
+    bottom: 12cqh;
+    height: min(78cqh, 108cqw);
+  }
+
+  .runway__hint {
+    bottom: 3cqh;
+  }
+
+  .figure[data-slot='-3'],
+  .figure[data-slot='-2'] { --x: -76; --o: 0; }
+  .figure[data-slot='-1'] { --x: -40; --s: 0.98; --blur: 2px; }
+  .figure[data-slot='0']  { --x: 0;   --s: 1.06; }
+  .figure[data-slot='1']  { --x: 37;  --s: 0.84; }
+  .figure[data-slot='2'],
+  .figure[data-slot='3']  { --x: 74;  --s: 0.74; --o: 0; }
+
+  .figure[data-slot='-2'],
+  .figure[data-slot='2'] {
+    pointer-events: none;
+  }
+
+  .figure[data-enter='left'] {
+    --enter-x: -76;
+  }
+
+  /* The tooltip sits above the pin so it cannot run off a narrow screen. */
+  .pin__tip {
+    left: 50%;
+    top: auto;
+    bottom: calc(100% + 10px);
+    translate: -50% 0;
+    transform: translateY(6px);
+  }
+
+  .runway__controls {
+    gap: 10px;
+  }
+
+  /* Only the current look keeps its label, so six steps fit a phone. */
+  .progress__step {
+    width: 16px;
+  }
+
+  .progress__step:not([aria-current]) .progress__label {
+    visibility: hidden;
+  }
+
+  .progress__step[aria-current] {
+    width: 132px;
+  }
+}

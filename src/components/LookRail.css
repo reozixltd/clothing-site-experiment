@@ -1,0 +1,135 @@
+.rail {
+  grid-area: 1 / 2 / -1 / 3; /* full height of the runway, right column */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 32px var(--gutter) 28px 28px;
+  border-left: 1px solid var(--line);
+}
+
+.rail__heading {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.rail__list {
+  display: grid;
+  gap: 4px;
+  margin-inline: -10px;
+}
+
+.rail__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px;
+  border-radius: var(--radius);
+  transition: background-color var(--quick);
+  animation: rail-in 480ms var(--ease) backwards;
+}
+
+.rail__item[data-active='true'] {
+  background: var(--surface);
+}
+
+.rail__thumb {
+  flex: none;
+  width: 60px;
+  height: 76px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgb(21 21 23 / 0.1);
+}
+
+.rail__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rail__text {
+  display: grid;
+  gap: 2px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.rail__category {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.rail__name {
+  font-weight: 500;
+}
+
+.rail__price {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.rail__buy {
+  margin-top: auto;
+  display: grid;
+  gap: 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.rail__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 14px;
+}
+
+.rail__total b {
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.rail__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 52px;
+  border-radius: var(--pill);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: transform var(--quick) var(--ease);
+}
+
+.rail__cta svg {
+  transition: transform var(--quick) var(--ease);
+}
+
+.rail__cta:hover svg {
+  transform: translateX(3px);
+}
+
+.rail__cta:active {
+  transform: scale(0.98);
+}
+
+@keyframes rail-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (max-width: 899px) {
+  .rail {
+    grid-area: auto;
+    padding: 24px var(--gutter) 32px;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+}

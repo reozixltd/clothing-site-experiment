@@ -1,0 +1,34 @@
+<!doctype html>
+<!--
+  Dev-only page (not part of the build). Renders the 3D model of every look
+  that has `model` set, with the site's camera and lights, so its line-up
+  image matches the live model.
+  Run `npm run dev`, open /render.html, then right-click each picture and save
+  it as public/looks/<look id>.webp (or .png).
+  Add ?yaw=0.6 to check a model from another angle.
+-->
+<meta charset="utf-8" />
+<title>Render looks</title>
+<style>
+  body { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px; background: #8a8a8a; font: 12px sans-serif; }
+  canvas { width: 500px; height: 1300px; background: #f4f3f1; }
+</style>
+<script type="module">
+  import { LOOKS } from './src/data/looks.ts';
+  import { createAvatar } from './src/lib/avatar.ts';
+
+  const yaw = Number(new URLSearchParams(location.search).get('yaw') ?? 0);
+  window.renders = {};
+  for (const look of LOOKS.filter((l) => l.model)) {
+    const figure = document.createElement('figure');
+    const canvas = document.createElement('canvas');
+    canvas.width = 500;
+    canvas.height = 1300;
+    figure.append(canvas, look.id);
+    document.body.append(figure);
+    const avatar = await createAvatar(canvas, look.model);
+    avatar.draw(yaw);
+    window.renders[look.id] = canvas.toDataURL('image/png'); // read in the same task as the draw
+  }
+  window.done = true;
+</script>
