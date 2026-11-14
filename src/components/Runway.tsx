@@ -101,7 +101,7 @@ export function Runway({ looks, onAddToBag }: Props) {
   const number = (i: number) => String(i + 1).padStart(2, '0');
 
   return (
-    <section className="runway" data-mode={detail ? 'detail' : 'browse'} data-ready={ready} aria-label="Shop the look">
+    <section className="runway" id="runway" data-mode={detail ? 'detail' : 'browse'} data-ready={ready} aria-label="Shop the look">
       <div className="runway__intro" key={detail ? look.id : 'browse'}>
         {detail ? (
           <>

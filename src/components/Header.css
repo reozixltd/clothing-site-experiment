@@ -1,4 +1,8 @@
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg);
   height: var(--header-h);
   padding-inline: var(--gutter);
   display: grid;

@@ -465,3 +465,21 @@ li:hover > .pin__tip,
     width: 132px;
   }
 }
+
+/* Scrolling on to the rail: the runway fades back as it leaves the screen. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .runway {
+      animation: runway-out linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+  }
+}
+
+@keyframes runway-out {
+  to {
+    opacity: 0.2;
+    filter: blur(6px);
+  }
+}

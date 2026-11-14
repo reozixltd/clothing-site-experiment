@@ -1,11 +1,23 @@
 import { MagnifyingGlass, ShoppingBag, User } from '@phosphor-icons/react';
+import { useEffect, useState } from 'react';
 import './Header.css';
 
-// Only "Runway" exists in this build. The other links are placeholders.
-const NAV = ['Home', 'Collections', 'Denim', 'Runway', 'Atelier'];
-const CURRENT = 'Runway';
+// Only "Runway" and "Rail" exist in this build: sections of the one page. The other links are placeholders.
+const NAV = ['Home', 'Runway', 'Rail', 'Denim', 'Atelier'];
+const HREF: Record<string, string> = { Runway: '#runway', Rail: '#rail' };
 
 export function Header({ bagCount }: { bagCount: number }) {
+  // The section filling most of the screen is the current page.
+  const [page, setPage] = useState('Runway');
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && setPage(e.target.id === 'rail' ? 'Rail' : 'Runway')),
+      { rootMargin: '-50% 0px' },
+    );
+    ['runway', 'rail'].forEach((id) => io.observe(document.getElementById(id)!));
+    return () => io.disconnect();
+  }, []);
+
   return (
     <header className="header">
       <a className="header__brand" href="#" aria-label="Halden home">
@@ -14,7 +26,7 @@ export function Header({ bagCount }: { bagCount: number }) {
 
       <nav className="header__nav" aria-label="Primary">
         {NAV.map((label) => (
-          <a key={label} href="#" aria-current={label === CURRENT ? 'page' : undefined}>
+          <a key={label} href={HREF[label] ?? '#'} aria-current={label === page ? 'page' : undefined}>
             {label}
           </a>
         ))}

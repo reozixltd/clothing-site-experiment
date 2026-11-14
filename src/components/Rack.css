@@ -1,0 +1,426 @@
+/*
+ * The rail. --w is the width of one hanger shot; everything scales off it.
+ * At rest each piece shows its side photo. Hover spins it on the hook: the
+ * side photo turns edge-on, then the front photo turns in from edge-on.
+ * The open piece sits over the rail, which blurs out behind it.
+ */
+.rack {
+  --w: clamp(58px, 15vw, 230px);
+  --spin: 170ms;
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: calc(100dvh - var(--header-h));
+  min-height: 500px;
+  overflow: hidden;
+}
+
+.rack__rail {
+  position: relative;
+  padding-inline: calc(var(--w) * 0.7);
+  transition:
+    filter 600ms var(--ease),
+    opacity 600ms var(--ease),
+    transform 600ms var(--ease);
+}
+
+.rack[data-open='true'] .rack__rail {
+  filter: blur(14px);
+  opacity: 0.45;
+  transform: scale(0.97);
+}
+
+/* Chrome rail with end caps; it passes through the hooks. */
+.rack__bar {
+  position: absolute;
+  top: calc(var(--w) * 0.03);
+  left: 0;
+  right: 0;
+  height: 6px;
+  border-radius: var(--pill);
+  background: linear-gradient(#f4f4f5, #a3a3a8 55%, #d4d4d7);
+  box-shadow: 0 2px 4px rgb(21 21 23 / 0.12);
+}
+
+.rack__bar::before,
+.rack__bar::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fafafa, #9a9aa0);
+}
+
+.rack__bar::before {
+  left: -6px;
+}
+
+.rack__bar::after {
+  right: -6px;
+}
+
+.rack__row {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Side shots are narrow: each piece takes 0.42 of a shot's width and its images overflow that. */
+.rack__item {
+  position: relative;
+  width: calc(var(--w) * 0.42);
+  transform-origin: 50% 0;
+}
+
+.rack__item[data-hover='true'] {
+  z-index: 2;
+}
+
+.rack__hanger {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: calc(var(--w) * 1.25);
+  perspective: 900px;
+}
+
+/* Full-size shots centred on the narrow button; only the button takes the pointer. */
+.rack__hanger .rack__side,
+.rack__hanger .rack__front {
+  position: absolute;
+  top: 0;
+  left: calc(50% - var(--w) / 2);
+  width: var(--w);
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+
+/* Leaving: the front turns away first, then the side turns back in. */
+.rack__side {
+  transition: transform var(--spin) ease-out var(--spin);
+}
+
+.rack__front {
+  transform: rotateY(90deg);
+  transition: transform var(--spin) ease-in;
+}
+
+/* Arriving: the side turns away fast, then the front turns in and grows. */
+.rack__item[data-hover='true'] .rack__side {
+  transform: rotateY(-90deg);
+  transition: transform var(--spin) ease-in;
+}
+
+.rack__item[data-hover='true'] .rack__front {
+  transform: rotateY(0deg) scale(1.3);
+  transition: transform calc(var(--spin) * 1.6) cubic-bezier(0.2, 0.8, 0.2, 1) var(--spin);
+}
+
+/* Scrolling the rail into view swings each piece in on its hook, one after another. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rack__item {
+      animation: hang-in linear backwards;
+      animation-timeline: view();
+      animation-range: entry calc(var(--i) * 4%) entry calc(60% + var(--i) * 4%);
+    }
+  }
+}
+
+@keyframes hang-in {
+  from {
+    opacity: 0;
+    translate: 0 -40px;
+    rotate: z 8deg;
+  }
+}
+
+.rack__hanger img,
+.rack__flip img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: top;
+  filter: drop-shadow(0 14px 18px rgb(21 21 23 / 0.14));
+  user-select: none;
+}
+
+.rack__caption {
+  margin-top: calc(var(--w) * 0.5);
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---------- Open piece ---------- */
+
+/* Rail and open piece share one grid cell, so whichever is taller sets the height. */
+.rack__rail,
+.rack__detail {
+  grid-area: 1 / 1;
+}
+
+.rack__detail {
+  position: relative;
+  align-self: stretch;
+  justify-self: stretch;
+  display: grid;
+  place-items: center;
+}
+
+.rack__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  perspective: 1400px;
+  animation: card-in 620ms var(--ease) backwards;
+}
+
+.rack__flip {
+  position: relative;
+  height: min(calc(100dvh - var(--header-h) - 290px), 440px);
+  aspect-ratio: 4 / 5;
+  margin-bottom: 8px;
+  transform-style: preserve-3d;
+  transform-origin: 50% 0;
+  transition: transform 800ms var(--ease);
+}
+
+.rack__flip[data-back='true'] {
+  transform: rotateY(180deg);
+}
+
+.rack__flip img {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.rack__flip img + img {
+  transform: rotateY(180deg);
+}
+
+.rack__name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.rack__price {
+  margin-top: -8px;
+  font-size: 14px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rack__sides {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+}
+
+.rack__sides button {
+  padding: 5px 16px;
+  border-radius: var(--pill);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition:
+    background-color var(--quick),
+    color var(--quick);
+}
+
+.rack__sides button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.rack__sizes {
+  display: flex;
+  gap: 8px;
+}
+
+.rack__sizes button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+  font-size: 13px;
+  transition:
+    border-color var(--quick),
+    background-color var(--quick),
+    color var(--quick);
+}
+
+.rack__sizes button:hover {
+  border-color: var(--ink);
+}
+
+.rack__sizes button[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.rack__cta {
+  min-width: 250px;
+  height: 48px;
+  margin-top: 4px;
+  padding-inline: 24px;
+  border-radius: var(--pill);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    background-color var(--quick),
+    transform var(--quick) var(--ease);
+}
+
+.rack__cta:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.rack__cta:disabled {
+  background: var(--line);
+  color: var(--muted);
+  cursor: default;
+}
+
+.rack__nav,
+.rack__close {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+  background: var(--surface);
+  font-size: 18px;
+  transition: border-color var(--quick);
+}
+
+.rack__nav:hover,
+.rack__close:hover {
+  border-color: var(--ink);
+}
+
+.rack__nav {
+  top: calc(50% - 24px);
+}
+
+.rack__nav--prev {
+  left: var(--gutter);
+}
+
+.rack__nav--next {
+  right: var(--gutter);
+}
+
+.rack__close {
+  top: 20px;
+  right: var(--gutter);
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+}
+
+/* The header wraps to two rows here, so the page grows instead of fitting the screen. */
+/*
+ * Phones: bigger pieces on a rail you swipe sideways. The row itself scrolls,
+ * the chrome bar becomes its fixed background line, and the caption stays put.
+ */
+@media (max-width: 767px) {
+  .rack {
+    --w: 132px;
+    height: auto;
+    min-height: 0;
+    padding-block: 40px 32px;
+  }
+
+  .rack__rail {
+    justify-self: stretch;
+    min-width: 0;
+    padding-inline: 0;
+  }
+
+  .rack__bar {
+    display: none;
+  }
+
+  .rack__row {
+    justify-content: flex-start;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding: 0 calc(50% - var(--w) * 0.21) calc(var(--w) * 0.45);
+    background: linear-gradient(#f4f4f5, #a3a3a8 55%, #d4d4d7) 0 calc(var(--w) * 0.03) / 100% 6px no-repeat;
+  }
+
+  .rack__row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rack__item {
+    flex: none;
+    scroll-snap-align: center;
+  }
+
+  /* The row is a scroller now, so the swing-in runs on the whole row. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .rack__item {
+        animation: none;
+      }
+
+      .rack__row {
+        animation: rail-in linear backwards;
+        animation-timeline: view();
+        animation-range: entry 0% entry 90%;
+      }
+    }
+  }
+
+  .rack__caption {
+    margin-top: 4px;
+  }
+
+  .rack__detail {
+    padding-block: 8px;
+  }
+}
+
+@keyframes rail-in {
+  from {
+    opacity: 0;
+    translate: 40% 0;
+  }
+}
+
+@media (max-width: 599px) {
+  .rack__flip {
+    /* Fits the whole card on the screen and keeps the image clear of the arrows. */
+    height: min(clamp(200px, calc(100dvh - 440px), 400px), calc((100vw - 136px) * 1.25));
+  }
+
+  .rack__cta {
+    min-width: 0;
+    width: calc(100vw - 2 * var(--gutter));
+  }
+}

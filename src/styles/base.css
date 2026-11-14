@@ -4,6 +4,19 @@
   box-sizing: border-box;
 }
 
+/* Runway and rail are sections of one page; nav links glide to them. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--header-h);
+}
+
+/* The header wraps to two rows on phones. */
+@media (max-width: 767px) {
+  html {
+    scroll-padding-top: 110px;
+  }
+}
+
 body {
   margin: 0;
   background: var(--bg);

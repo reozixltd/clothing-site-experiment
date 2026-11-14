@@ -45,6 +45,7 @@ src/
   App.tsx                page shell, holds the bag count
   data/
     looks.ts             ALL content: looks, products, prices, pin positions
+    rack.ts              the ten pieces on the rail
   lib/
     carousel.ts          slot maths for the looping line-up (pure functions)
     carousel.test.ts     the test for it
@@ -56,6 +57,7 @@ src/
     Turntable.tsx        turn a real person: swaps photos from a turntable video
     Model3D.tsx          optional rotatable 3D model (unused, see below)
     LookRail.tsx / .css  "In this look" product list and buy button
+    Rack.tsx / .css      the clothes rail section
   styles/
     tokens.css           colours, radius, font, timing
     base.css             reset, focus ring, reduced-motion rule
@@ -98,6 +100,48 @@ re-rendered on charcoal for that reason).
    of the look image from its top left corner. z only matters for a 3D model
    (how far the spot sits in front of the body, in percent of the image width:
    about 15 for a chest, 12 for a thigh).
+
+## The Rail (`#rail`)
+
+One page, two sections: the runway first, the rail below it. Scroll down (the runway fades and blurs
+back as it leaves, a scroll-driven animation) or use "Runway" / "Rail" in the sticky header, which glides
+there and marks the section you are on. The rail is `src/components/Rack.tsx` and `Rack.css`; the code says "rack" because
+`.rail` is the look rail's class. Its ten pieces are in `src/data/rack.ts`.
+
+- Each piece hangs side-on, shown by a real side photo. Scrolling the rail into view swings the pieces
+  in on their hooks one after another (`animation-timeline: view()`, skipped where unsupported).
+- Hover or focus a piece: the side photo spins edge-on and the front photo spins in from edge-on and grows
+  (`--spin` in `Rack.css`, 170 ms per half turn). The caption shows its name and price.
+- Click: the rail blurs out and the piece opens on its own. You get Front / Back (a 180° spin on
+  the hook), sizes, and an add-to-bag button that stays disabled until you pick a size. Prev / next arrows
+  and Left / Right keys move along the rail. Escape or the X goes back.
+- `--w` at the top of `Rack.css` sets the size of a hanger shot; everything scales off it.
+- Phones (767px and narrower): bigger pieces on a rail you swipe sideways; tap a piece to open it,
+  and swipe the open piece left / right to move along the rail.
+
+### Hanger shots
+
+`public/rack/<id>-front.webp`, `-side.webp` and `-back.webp`: 800 x 1000, transparent, the hook top centre,
+every view scaled to the front's garment height so they line up. Made in Google Flow with Nano Banana 2.1, 3:4
+(0 credits, downloaded as 2K Upscaled). The 2K originals are in `flow/rack/`.
+
+1. **Front** (text only): "Straight-on studio product photograph … Subject: *the garment*, hanging from a
+   slim natural wood clothes hanger with a polished chrome hook at the top centre … front facing the
+   camera … Backdrop: one completely flat, uniform, solid pure magenta colour (#FF00FF) … no shadow,
+   no magenta reflection on the garment … no text, no logo".
+2. **Back:** attach the 2K front and ask for "the exact same garment on the exact same hanger … turned
+   around 180 degrees so the BACK of the garment faces the camera. Keep the identical size, position in
+   frame …", same backdrop.
+3. **Side** (text only, same garment description): "… photographed in exact side profile, as if on a shop
+   rail seen from the end of the rail: the hanger is seen edge-on as a thin vertical line … only its left
+   sleeve is visible … the front edge of the garment faces the right-hand side of the picture … Static and
+   sharp, no motion blur, no duplicate garment". Attaching the front and asking Flow to *turn* it gives
+   motion-blur ghosts and double garments on jackets (hoodies were fine).
+4. **Cut out:** `python flow/cutout.py <id> [<id> …]` reads the three JPGs from `flow/rack/` and writes the
+   three WebPs. It keys the magenta out of the whole image relative to each image's own backdrop (Flow's
+   magenta drifts towards pink), so gaps inside the hanger and under the arms come out clean as well.
+   Don't use magenta for a pink or purple garment; pick a backdrop colour the garment doesn't have and
+   change the key in `cutout.py`.
 
 ## Turning a real person
 
@@ -198,7 +242,8 @@ Everything visual is set in `src/styles/tokens.css`:
 
 ## Not included
 
-- The other nav pages. Only Runway exists; the other links go nowhere.
+- The other nav pages. Only Runway and Rail exist (sections of the one page); the other links go nowhere.
+- "See availability" from the reference rail design (no stock data).
 - Search, account, cart contents and checkout. The buttons are there, the features are not.
 - A dark theme.
 - Prices are sample data.
