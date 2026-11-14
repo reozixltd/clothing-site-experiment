@@ -297,9 +297,11 @@
   cursor: default;
 }
 
+/* z-index: on phones the full-width card (its perspective makes a stacking context) would sit over these. */
 .rack__nav,
 .rack__close {
   position: absolute;
+  z-index: 1;
   display: grid;
   place-items: center;
   width: 48px;
