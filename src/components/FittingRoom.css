@@ -1,0 +1,409 @@
+/*
+ * The fitting room. The section is the colour of the photo's studio wall, and the
+ * photo's edges fade out, so the model stands in the page rather than in a box.
+ * Desktop: five columns, two tops + two bottoms each side of the model.
+ * The two piece lists are display: contents, so their items sit on that grid.
+ */
+.fit {
+  --tile: clamp(84px, 8.5vw, 148px);
+  container-type: size; /* the model column is sized off the section height */
+  position: relative;
+  height: calc(100dvh - var(--header-h));
+  min-height: 560px;
+  overflow: hidden;
+  background: var(--backdrop);
+  transition: background-color 400ms var(--ease);
+}
+
+.fit__room {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  padding: 20px var(--gutter) 14px;
+}
+
+.fit__bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+}
+
+.fit__title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.fit__try {
+  justify-self: end;
+}
+
+.fit__models {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid rgb(21 21 23 / 0.16);
+  border-radius: var(--pill);
+}
+
+.fit__models button {
+  padding: 6px 18px;
+  border-radius: var(--pill);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition:
+    background-color var(--quick),
+    color var(--quick);
+}
+
+.fit__models button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.fit__floor {
+  display: grid;
+  /* Model column = the photo's width (floor height x 768/1376) plus a little air; the pieces hug it. */
+  grid-template-columns: 1fr repeat(2, var(--tile)) calc((100cqh - 120px) * 0.558 + 40px) repeat(2, var(--tile)) 1fr;
+  grid-template-rows: 1fr 1fr;
+  column-gap: clamp(10px, 1.6vw, 24px);
+  row-gap: 18px;
+  min-height: 0;
+}
+
+.fit__row {
+  display: contents;
+}
+
+.fit__row li {
+  grid-row: 1;
+  align-self: end;
+  list-style: none;
+}
+
+.fit__row--bottoms li {
+  grid-row: 2;
+  align-self: start;
+}
+
+.fit__row li:nth-child(1) { grid-column: 2; }
+.fit__row li:nth-child(2) { grid-column: 3; }
+.fit__row li:nth-child(3) { grid-column: 5; }
+.fit__row li:nth-child(4) { grid-column: 6; }
+
+.fit__piece {
+  display: block;
+  width: var(--tile);
+  aspect-ratio: 4 / 5;
+  padding: 8px;
+  border-radius: var(--radius);
+  background: rgb(250 250 249 / 0.4);
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  transition:
+    background-color var(--quick),
+    outline-color var(--quick),
+    transform var(--quick) var(--ease);
+}
+
+.fit__piece:hover {
+  background: rgb(250 250 249 / 0.7);
+}
+
+.fit__piece:active {
+  transform: scale(0.97);
+}
+
+.fit__piece[aria-pressed='true'] {
+  background: rgb(250 250 249 / 0.75);
+  outline-color: var(--ink);
+}
+
+.fit__piece img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 8px rgb(21 21 23 / 0.12));
+  user-select: none;
+}
+
+.fit__stage {
+  position: relative;
+  grid-column: 4;
+  grid-row: 1 / 3;
+  min-height: 0;
+}
+
+/*
+ * Fade all four edges: wide at the sides (the wall has a vignette), short top and bottom.
+ * Two nested masks (stage: top/bottom, photo: sides); one element with two composited
+ * masks left a hard edge in Chrome.
+ */
+.fit__stage {
+  mask-image: linear-gradient(transparent, #000 60px, #000 calc(100% - 40px), transparent);
+}
+
+.fit__model {
+  /* The box is the photo's own shape, so the fades land on the photo's edges. */
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 768 / 1376;
+  margin: auto;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 350ms var(--ease);
+  user-select: none;
+  mask-image: linear-gradient(90deg, transparent, #000 32%, #000 68%, transparent);
+}
+
+.fit__model[data-front='true'] {
+  opacity: 1;
+}
+
+.fit__caption {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.fit__caption button {
+  text-decoration: underline transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--quick), color var(--quick);
+}
+
+.fit__caption button:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+
+.fit__live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- Drawer ---------- */
+
+.fit__drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: min(380px, 100%);
+  padding: 64px 28px 28px;
+  background: var(--surface);
+  box-shadow: -24px 0 48px rgb(21 21 23 / 0.12);
+  text-align: center;
+  animation: drawer-in 420ms var(--ease) backwards;
+}
+
+.fit__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+  font-size: 18px;
+  transition: border-color var(--quick);
+}
+
+.fit__close:hover {
+  border-color: var(--ink);
+}
+
+.fit__shot {
+  width: min(100%, 260px);
+  aspect-ratio: 4 / 5;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.fit__name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.fit__price {
+  margin-top: -6px;
+  font-size: 14px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.fit__sizes {
+  display: flex;
+  gap: 8px;
+}
+
+.fit__sizes button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+  font-size: 13px;
+  transition:
+    border-color var(--quick),
+    background-color var(--quick),
+    color var(--quick);
+}
+
+.fit__sizes button:hover {
+  border-color: var(--ink);
+}
+
+.fit__sizes button[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.fit__cta {
+  width: 100%;
+  height: 48px;
+  margin-top: 4px;
+  border-radius: var(--pill);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 500;
+  transition: transform var(--quick) var(--ease);
+}
+
+.fit__cta:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.fit__cta:disabled {
+  background: var(--line);
+  color: var(--muted);
+  cursor: default;
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fit__model,
+  .fit {
+    transition: none;
+  }
+
+  .fit__drawer {
+    animation: none;
+  }
+}
+
+/* ---------- Phones: model first, then a swipe strip of tops and one of bottoms. ---------- */
+@media (max-width: 767px) {
+  .fit {
+    --tile: 104px;
+    container-type: normal;
+    height: auto;
+    min-height: 0;
+  }
+
+  .fit__room {
+    display: block;
+    padding-inline: 0;
+  }
+
+  .fit__bar {
+    grid-template-columns: 1fr auto;
+    padding-inline: var(--gutter);
+  }
+
+  .fit__models {
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .fit__try {
+    grid-row: 1 / 3;
+    grid-column: 2;
+  }
+
+  .fit__floor {
+    display: block;
+  }
+
+  .fit__stage {
+    height: min(68dvh, 560px);
+    margin-block: 8px;
+  }
+
+  .fit__row {
+    display: flex;
+    gap: 10px;
+    margin: 0 0 10px;
+    padding: 4px var(--gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .fit__row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .fit__row li {
+    flex: none;
+    scroll-snap-align: center;
+  }
+
+  .fit__caption {
+    flex-wrap: wrap;
+    padding-inline: var(--gutter);
+  }
+
+  .fit__drawer {
+    position: fixed;
+    top: auto;
+    left: 0;
+    width: 100%;
+    max-height: 88dvh;
+    overflow-y: auto;
+    padding-top: 56px;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -24px 48px rgb(21 21 23 / 0.16);
+    animation-name: sheet-in;
+  }
+
+  .fit__shot {
+    width: min(60vw, 220px);
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}

@@ -2,19 +2,25 @@ import { MagnifyingGlass, ShoppingBag, User } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import './Header.css';
 
-// Only "Runway" and "Rail" exist in this build: sections of the one page. The other links are placeholders.
-const NAV = ['Home', 'Runway', 'Rail', 'Denim', 'Atelier'];
-const HREF: Record<string, string> = { Runway: '#runway', Rail: '#rail' };
+// The sections of the one page. The other nav links are placeholders.
+const SECTIONS = [
+  { id: 'runway', label: 'Runway' },
+  { id: 'rail', label: 'Rail' },
+  { id: 'fitting', label: 'Fitting Room' },
+];
+const NAV = ['Home', ...SECTIONS.map((s) => s.label), 'Denim', 'Atelier'];
+const HREF = Object.fromEntries(SECTIONS.map((s) => [s.label, `#${s.id}`]));
 
 export function Header({ bagCount }: { bagCount: number }) {
   // The section filling most of the screen is the current page.
   const [page, setPage] = useState('Runway');
   useEffect(() => {
     const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && setPage(e.target.id === 'rail' ? 'Rail' : 'Runway')),
+      (entries) =>
+        entries.forEach((e) => e.isIntersecting && setPage(SECTIONS.find((s) => s.id === e.target.id)!.label)),
       { rootMargin: '-50% 0px' },
     );
-    ['runway', 'rail'].forEach((id) => io.observe(document.getElementById(id)!));
+    SECTIONS.forEach((s) => io.observe(document.getElementById(s.id)!));
     return () => io.disconnect();
   }, []);
 
