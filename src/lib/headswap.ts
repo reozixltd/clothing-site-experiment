@@ -26,3 +26,13 @@ export function parseSwapStream(text: string): SwapResult | null {
   }
   return null;
 }
+
+/**
+ * One swap at a time; a pick made while one runs replaces whatever was queued (only the latest
+ * counts). Picks already swapped, already running, or already queued start nothing.
+ */
+export function nextJob(running: string | null, queued: string | null, pick: string, done: Set<string>) {
+  if (done.has(pick) || pick === running) return { start: null, queued: running ? null : queued };
+  if (running) return { start: null, queued: pick };
+  return { start: pick, queued: null };
+}

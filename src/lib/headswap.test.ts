@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { outfitSrc, outfitKey, parseSwapStream, pieceSrc } from './headswap.ts';
+import { nextJob, outfitSrc, outfitKey, parseSwapStream, pieceSrc } from './headswap.ts';
 import { FIT_MODELS } from '../data/fitting.ts';
 import { RACK } from '../data/rack.ts';
 
@@ -28,4 +28,12 @@ test('every model has 4 new tops and 4 bottoms', () => {
     for (const t of m.tops) assert.ok(!RACK.some((p) => p.id === t.id));
   }
   assert.equal(pieceSrc('tops', 'x'), '/fitting/tops/x.webp');
+});
+
+test('queue keeps only the latest pick', () => {
+  assert.deepEqual(nextJob(null, null, 'a', new Set()), { start: 'a', queued: null });
+  assert.deepEqual(nextJob('a', null, 'b', new Set()), { start: null, queued: 'b' });
+  assert.deepEqual(nextJob('a', 'b', 'c', new Set()), { start: null, queued: 'c' });
+  assert.deepEqual(nextJob(null, null, 'a', new Set(['a'])), { start: null, queued: null });
+  assert.deepEqual(nextJob('a', 'b', 'a', new Set()), { start: null, queued: null });
 });

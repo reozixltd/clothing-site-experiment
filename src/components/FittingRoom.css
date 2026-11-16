@@ -195,6 +195,128 @@
   white-space: nowrap;
 }
 
+/* ---------- Try it on me ---------- */
+
+.fit__try {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.fit__trybtn {
+  height: 40px;
+  padding-inline: 20px;
+  border-radius: var(--pill);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 500;
+  transition: transform var(--quick) var(--ease);
+}
+
+.fit__trybtn:active {
+  transform: scale(0.97);
+}
+
+.fit__link {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.fit__link:hover {
+  color: var(--ink);
+}
+
+.fit__status {
+  min-height: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+/* While a swap runs: a slow light band sweeps down the photo (the photo's own box, like the img). */
+.fit__stage[data-working='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 768 / 1376;
+  margin: auto;
+  background: linear-gradient(transparent 0%, rgb(250 250 249 / 0.55) 50%, transparent 100%) 0 0 / 100% 40% no-repeat;
+  mask-image: linear-gradient(90deg, transparent, #000 32%, #000 68%, transparent);
+  animation: scan 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  from {
+    background-position: 0 -60%;
+  }
+  to {
+    background-position: 0 160%;
+  }
+}
+
+.fit__panel {
+  gap: 14px;
+}
+
+.fit__tips {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.fit__consent {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.fit__consent input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  accent-color: var(--ink);
+}
+
+.fit__upload {
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.fit__upload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.fit__upload:has(input:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.fit__upload[data-disabled='true'] {
+  background: var(--line);
+  color: var(--muted);
+  cursor: default;
+}
+
+.fit__error {
+  font-size: 13px;
+  color: var(--accent);
+}
+
 /* ---------- Drawer ---------- */
 
 .fit__drawer {
@@ -319,6 +441,11 @@
   .fit__drawer {
     animation: none;
   }
+
+  .fit__stage[data-working='true']::after {
+    animation: none;
+    background-position: 0 50%;
+  }
 }
 
 /* ---------- Phones: model first, then a swipe strip of tops and one of bottoms. ---------- */
@@ -348,6 +475,9 @@
   .fit__try {
     grid-row: 1 / 3;
     grid-column: 2;
+    flex-direction: column;
+    align-items: end;
+    gap: 6px;
   }
 
   .fit__floor {

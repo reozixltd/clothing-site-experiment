@@ -3,7 +3,9 @@ import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { BOTTOM_SIZES, FIT_MODELS, TOP_SIZES } from '../data/fitting';
 import { formatPrice } from '../data/looks';
 import type { Piece } from '../data/rack';
-import { outfitKey, outfitSrc, pieceSrc } from '../lib/headswap';
+import { nextJob, outfitKey, outfitSrc, pieceSrc } from '../lib/headswap';
+import { headSwap } from '../lib/swapClient';
+import { TryOn } from './TryOn';
 import './FittingRoom.css';
 
 type Kind = 'tops' | 'bottoms';
@@ -24,9 +26,63 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
   const topPiece = model.tops.find((p) => p.id === top)!;
   const bottomPiece = model.bottoms.find((p) => p.id === bottom)!;
 
-  // "Try it on me" results, per model + outfit. Task 4 fills it.
-  const [swapped] = useState(() => new Map<string, string>());
-  const src = swapped.get(outfitKey(modelId, top, bottom)) ?? outfitSrc(modelId, top, bottom);
+  // "Try it on me": the visitor's photo and their swapped photos per model + outfit.
+  // One swap at a time; only the latest pick waits (nextJob). No pre-swapping.
+  const key = outfitKey(modelId, top, bottom);
+  const [face, setFace] = useState<Blob | null>(null);
+  const [swapped, setSwapped] = useState<Map<string, string>>(() => new Map());
+  const swappedRef = useRef(swapped);
+  swappedRef.current = swapped;
+  const [job, setJob] = useState<{ running: string | null; queued: string | null }>({ running: null, queued: null });
+  const [onMe, setOnMe] = useState(true);
+  const [tryOpen, setTryOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const abort = useRef<AbortController | null>(null);
+  const busyTimer = useRef(0);
+
+  useEffect(() => {
+    if (!face) return;
+    setJob((j) => {
+      const n = nextJob(j.running, j.queued, key, new Set(swappedRef.current.keys()));
+      return n.start ? { running: n.start, queued: null } : { running: j.running, queued: n.queued };
+    });
+  }, [key, face]);
+
+  useEffect(() => {
+    const k = job.running;
+    if (!k || !face) return;
+    const ctl = new AbortController();
+    abort.current = ctl;
+    const [m, t, b] = k.split('/');
+    headSwap(face, location.origin + outfitSrc(m, t, b), ctl.signal)
+      .then((url) => setSwapped((s) => new Map(s).set(k, url)))
+      .catch(() => {
+        if (ctl.signal.aborted) return;
+        setBusy(true);
+        clearTimeout(busyTimer.current);
+        busyTimer.current = window.setTimeout(() => setBusy(false), 6000);
+      })
+      .finally(() => {
+        if (!ctl.signal.aborted) setJob((j) => ({ running: j.queued, queued: null }));
+      });
+    return () => ctl.abort();
+  }, [job.running, face]);
+
+  const cancel = () => {
+    abort.current?.abort();
+    setJob({ running: null, queued: null });
+  };
+  const removePhoto = () => {
+    cancel();
+    swapped.forEach((url) => URL.revokeObjectURL(url));
+    setSwapped(new Map());
+    setFace(null);
+    setOnMe(true);
+  };
+
+  const mine = onMe ? swapped.get(key) : undefined;
+  const src = mine ?? outfitSrc(modelId, top, bottom);
+  const working = face !== null && onMe && !mine && (job.running === key || job.queued === key);
 
   // Two stacked photos: the next one loads and decodes underneath, then fades in.
   const [layers, setLayers] = useState({ a: src, b: src, front: 'a' as 'a' | 'b' });
@@ -61,16 +117,21 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
   };
   const close = () => {
     setOpen(null);
+    setTryOpen(false);
     requestAnimationFrame(() => opener.current?.focus());
+  };
+  const openTry = () => {
+    opener.current = document.activeElement as HTMLElement;
+    setTryOpen(true);
   };
 
   useEffect(() => {
     if (open) closeRef.current?.focus();
   }, [open]);
 
-  // Capture phase, so the runway's own arrow keys don't fire while the drawer is open.
+  // Capture phase, so the runway's own arrow keys don't fire while the drawer or panel is open.
   useEffect(() => {
-    if (!open) return;
+    if (!open && !tryOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (!['Escape', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
       e.stopImmediatePropagation();
@@ -115,10 +176,10 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
       className="fit"
       id="fitting"
       aria-label="Fitting room"
-      data-open={open !== null}
+      data-open={open !== null || tryOpen}
       style={{ '--backdrop': model.backdrop } as CSSProperties}
     >
-      <div className="fit__room" inert={open !== null}>
+      <div className="fit__room" inert={open !== null || tryOpen}>
         <div className="fit__bar">
           <h2 className="fit__title">Fitting Room</h2>
           <div className="fit__models" role="group" aria-label="Model">
@@ -128,18 +189,38 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
               </button>
             ))}
           </div>
-          <div className="fit__try" />
+          <div className="fit__try">
+            {face ? (
+              <>
+                <div className="fit__models" role="group" aria-label="Show the outfit">
+                  <button type="button" aria-pressed={onMe} onClick={() => setOnMe(true)}>
+                    On me
+                  </button>
+                  <button type="button" aria-pressed={!onMe} onClick={() => setOnMe(false)}>
+                    On the model
+                  </button>
+                </div>
+                <button className="fit__link" type="button" onClick={removePhoto}>
+                  Remove my photo
+                </button>
+              </>
+            ) : (
+              <button className="fit__trybtn" type="button" onClick={openTry}>
+                Try it on me
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="fit__floor">
-          <div className="fit__stage">
+          <div className="fit__stage" data-working={working}>
             {(['a', 'b'] as const).map((k) => (
               <img
                 key={k}
                 className="fit__model"
                 src={layers[k]}
                 data-front={layers.front === k}
-                alt={layers.front === k ? `Model wearing the ${topPiece.name} and ${bottomPiece.name}` : ''}
+                alt={layers.front === k ? `${mine ? 'You' : 'Model'} wearing the ${topPiece.name} and ${bottomPiece.name}` : ''}
                 draggable={false}
               />
             ))}
@@ -157,10 +238,33 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
             Bottom: {bottomPiece.name}
           </button>
         </p>
+        <p className="fit__status" aria-live="polite">
+          {working ? (
+            <>
+              Putting you in this outfit… ~30 s{' '}
+              <button className="fit__link" type="button" onClick={cancel}>
+                Cancel
+              </button>
+            </>
+          ) : busy ? (
+            'The free try-on service is busy. Try again in a minute.'
+          ) : null}
+        </p>
         <p className="fit__live" aria-live="polite">
           Wearing the {topPiece.name} and {bottomPiece.name}
         </p>
       </div>
+
+      {tryOpen && (
+        <TryOn
+          onClose={close}
+          onPhoto={(blob) => {
+            setFace(blob);
+            setOnMe(true);
+            close();
+          }}
+        />
+      )}
 
       {open && (
         <div className="fit__drawer" role="dialog" aria-modal="true" aria-label={open.piece.name}>
