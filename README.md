@@ -35,6 +35,7 @@ Needs Node 22.18 or newer (`npm test` runs the TypeScript test file directly).
 | Bag counter | The header bag icon counts added items (there is no checkout) |
 | Leave detail | "All looks" button or Escape |
 | Phone layout | Three models on stage, rail moves below, nav becomes a scrollable row |
+| Fitting Room | Pick a top and a bottom and the model wears them; click the worn piece for sizes; "Try it on me" puts your own head on the model |
 
 ## Folder structure
 
@@ -46,10 +47,13 @@ src/
   data/
     looks.ts             ALL content: looks, products, prices, pin positions
     rack.ts              the ten pieces on the rail
+    fitting.ts           fitting room models, garments, prices, sizes
   lib/
     carousel.ts          slot maths for the looping line-up (pure functions)
     carousel.test.ts     the test for it
     avatar.ts            loads one 3D model and draws it (camera, lights, pose)
+    headswap.ts          fitting room paths, Space stream parser, swap queue rule (+ .test.ts)
+    swapClient.ts        "Try it on me": prepares the photo, calls the head-swap Space
   components/
     Header.tsx / .css    logo, nav, search, account, bag
     Runway.tsx / .css    the stage, title, progress bar, both modes
@@ -58,16 +62,20 @@ src/
     Model3D.tsx          optional rotatable 3D model (unused, see below)
     LookRail.tsx / .css  "In this look" product list and buy button
     Rack.tsx / .css      the clothes rail section
+    FittingRoom.tsx / .css  the fitting room section
+    TryOn.tsx            the "Try it on me" photo panel
   styles/
     tokens.css           colours, radius, font, timing
     base.css             reset, focus ring, reduced-motion rule
 render.html              dev-only page that renders 3D models as line-up images
 flow/                    the original Google Flow images and turntable video, sources of public/
+  fitting/               fitting room originals; fitting.py turns them into public/fitting/
 public/
   looks/                 cutout of each model, used in the line-up and detail view
   products/              product photos (packshots, originals in flow/products/)
   turns/<look id>/       turntable photos 0.webp ... 35.webp
   models/<folder>/       optional 3D models (model.fbx plus textures), currently unused
+  fitting/               outfit photos (<model>/<top>__<bottom>.webp) and garment cutouts (tops/, bottoms/)
 ```
 
 ## The model images
@@ -223,6 +231,43 @@ One special case: when the line-up loops, one look has to get from one end to
 the other. Instead of sliding across the stage it gets a `data-enter` attribute
 and walks in from off stage (`@keyframes walk-in`).
 
+## The Fitting Room (`#fitting`)
+
+The third section. One model stands centre stage on the colour of their own studio wall, with four tops
+on the upper row and four bottoms on the lower, two each side. Him / Her switches model; each keeps their
+own outfit. Click a piece and the model is wearing it: a cross-fade to a real photo of that outfit. Click
+the worn piece (or its name under the model) for sizes and Add to bag. Escape or the X closes it.
+
+**No virtual try-on model runs for this.** Every combination is its own Flow photo: 4 tops x 4 bottoms
+= 16 photos per model, made with Nano Banana in Google Flow (0 credits) by attaching the base outfit photo
+and asking for the same person, pose, framing and backdrop wearing the new pieces. The garment cutouts are
+Flow packshots on magenta. `python flow/fitting.py` turns `flow/fitting/` into `public/fitting/` (outfits
+768 x 1376 WebP, cutouts 800 x 1000 transparent) and prints each model's wall colour for `backdrop` in
+`src/data/fitting.ts`.
+
+To add a garment: one packshot, plus one outfit photo for every piece it can be worn with (a new top for
+one model = 4 photos), named `<top>__<bottom>.jpg`. Check the head lines up with the base photo, or the
+cross-fade jumps.
+
+### Try it on me
+
+"Try it on me" puts the visitor's whole head (face and hair) onto the model, using the free community
+Hugging Face Space [`hugging-apps/bfs-best-face-swap`](https://huggingface.co/spaces/hugging-apps/bfs-best-face-swap)
+(BFS head swap), called straight from the browser. No backend, no key, $0.
+
+- The photo is checked (images only, up to 15 MB), turned upright from its EXIF data, shrunk to 1024 px and
+  kept only in memory. "Remove my photo" drops it and every result.
+- One swap at a time, about 30 s each, and only the outfit you are looking at. Pick several outfits while
+  one runs and only the last one waits. Results are kept, so going back is instant.
+- **Limits.** A free Space can be asleep, busy, changed or deleted at any time, and Hugging Face gives each
+  anonymous visitor (per IP address) a small daily ZeroGPU quota, a handful of swaps. When it fails the
+  visitor sees "The free try-on service is busy" and keeps the model photo. The Space address is the
+  `SPACE` constant in `src/lib/swapClient.ts`.
+- **Licences.** The BFS LoRA is MIT. The base models it runs on (Qwen-Image-2.1, the Viggle turbo) have
+  their own custom licences: read them before using this commercially.
+- **Privacy.** The visitor ticks a consent box first: their photo goes to a third-party service, which may
+  keep it. This site never stores it.
+
 ## Design tokens
 
 Everything visual is set in `src/styles/tokens.css`:
@@ -242,7 +287,7 @@ Everything visual is set in `src/styles/tokens.css`:
 
 ## Not included
 
-- The other nav pages. Only Runway and Rail exist (sections of the one page); the other links go nowhere.
+- The other nav pages. Runway, Rail and Fitting Room are sections of the one page; the other links go nowhere.
 - "See availability" from the reference rail design (no stock data).
 - Search, account, cart contents and checkout. The buttons are there, the features are not.
 - A dark theme.
