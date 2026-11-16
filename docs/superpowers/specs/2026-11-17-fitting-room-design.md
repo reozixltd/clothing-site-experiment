@@ -78,14 +78,13 @@ so they can see how the outfit would look on them. **$0 running cost**: no paid 
 `src/data/fitting.ts`:
 
 ```ts
-interface FitModel { id: 'him' | 'her'; name: string; tops: string[]; bottoms: string[] }
-interface Bottom { id: string; name: string; price: number }
+interface Piece { id: string; name: string; price: number }
+interface FitModel { id: 'him' | 'her'; name: string; tops: Piece[]; bottoms: Piece[]; backdrop: string }
 ```
 
-- **Tops reuse the Rail**: 4 pieces from `RACK` per model (ids, names, prices from `rack.ts`, grid
-  image = the existing `/rack/<id>-front.webp`). Unisex outerwear, so both models can share some.
-  Any Rail piece works (every outfit gets its own swap); favour the six jackets for variety.
-- **Bottoms are new**: 4 per model, packshots `/fitting/bottoms/<id>.webp` (transparent).
+- **All clothes are new** (user, 2026-11-17: "generate new clothes not the previous ones"): no Rail pieces.
+  4 tops + 4 bottoms per model, each with a Flow packshot, transparent: `/fitting/tops/<id>.webp`,
+  `/fitting/bottoms/<id>.webp`.
 - Outfit photos: `/fitting/<model>/<top>__<bottom>.webp`, full Flow photo (backdrop kept, no cutout),
   768 × 1376. The section background is the Flow backdrop colour and the image edges fade with a CSS
   `mask-image`, so no cutouts are needed and the head swap works on the plain photo. A studio photo has
@@ -93,17 +92,18 @@ interface Bottom { id: string; name: string; price: number }
 
 ### Making the images (Flow, Nano Banana, free)
 
-1. Per model, one base photo: full length, front facing, arms relaxed, plain light grey backdrop,
-   wearing top 1 + bottom 1 (the Rail jacket's 2K front shot attached as reference).
+1. Packshots first (magenta backdrop, ghost mannequin, front), so each garment has a reference image.
+   Per model, one base photo: full length, front facing, arms relaxed, plain light grey backdrop,
+   wearing top 1 + bottom 1 (their packshots attached as reference).
 2. The other 15 combinations: attach the base photo and the garment shot, "the exact same person, pose,
    framing, lighting and backdrop; change only the jacket / trousers to the attached one".
 3. **Check after the first 3**: overlay them; the model must stay put (within ~1% of the image) so the
    cross-fade between outfits does not jump. If it drifts, align each image to the base on the face
    position before saving. Also view one inside the section to check the backdrop blends.
-4. Bottom packshots: magenta backdrop, cut out with the `cutout()` function from `flow/cutout.py`.
+4. Packshots are cut out with the `cutout()` function from `flow/cutout.py`.
 5. Originals go in `flow/fitting/`, as with the other Flow sources.
 
-Total: 32 outfit stills + 8 bottom packshots, 0 credits.
+Total: 32 outfit stills + 16 packshots, 0 credits.
 
 ### "Try it on me"
 
@@ -156,7 +156,7 @@ off the cross-fade and shimmer.
 
 ## Left to the builder
 
-- Which 4 Rail jackets and which 4 bottoms per model (aim for variety of colour).
+- Which 4 tops and 4 bottoms per model (aim for variety of colour; not the Rail's hoodies and jackets).
 - Cross-fade timing, shimmer look, exact layout spacing; use `tokens.css`.
 
 ## Later upgrades (not now)

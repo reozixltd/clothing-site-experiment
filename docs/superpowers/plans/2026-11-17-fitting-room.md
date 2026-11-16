@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** A `#fitting` section where visitors dress a photoreal man or woman in Rail jackets and new trousers, and can swap their own head onto the model with a free Hugging Face head-swap Space.
+**Goal:** A `#fitting` section where visitors dress a photoreal man or woman in new tops and bottoms made for it, and can swap their own head onto the model with a free Hugging Face head-swap Space.
 
 **Architecture:** Pre-made Flow photos, one per model × top × bottom, are swapped by a React component. "Try it on me" sends the visitor's photo and the current outfit photo to `hugging-apps/bfs-best-face-swap` with plain `fetch`, and caches one result per outfit in memory. Pure helpers (image paths, event-stream parsing) live in `src/lib/headswap.ts` with a node test.
 
@@ -37,21 +37,22 @@
 **Files:**
 - Create: `flow/fitting/<model>/<top>__<bottom>.jpg` (Flow originals), `flow/fitting/bottoms/<id>.jpg`
 - Create: `flow/fitting.py` (prep script)
-- Create: `public/fitting/<model>/<top>__<bottom>.webp`, `public/fitting/bottoms/<id>.webp`
+- Create: `public/fitting/<model>/<top>__<bottom>.webp`, `public/fitting/bottoms/<id>.webp`, `public/fitting/tops/<id>.webp`
 
-**Garments (fixed here so the data and the images agree):**
+**Garments (all new, none from the Rail; fixed here so the data and the images agree):**
 
-| model | tops (Rail ids) | bottoms (id, name, price) |
+| model | tops (id, name, price) | bottoms (id, name, price) |
 |---|---|---|
-| him | `rust-coach-jacket`, `navy-varsity-jacket`, `olive-liner-jacket`, `ecru-sherpa-jacket` | `grey-utility-cargo` Grey Utility Cargo 135 · `stone-pleated-trouser` Stone Pleated Trouser 150 · `black-straight-jean` Black Straight Jean 140 · `ecru-carpenter-pant` Ecru Carpenter Pant 130 |
-| her | `burgundy-track-jacket`, `cocoa-cord-trucker`, `ecru-sherpa-jacket`, `navy-varsity-jacket` | `cream-wide-trouser` Cream Wide-Leg Trouser 145 · `black-midi-skirt` Black Midi Skirt 120 · `indigo-wide-jean` Indigo Wide Jean 150 · `camel-pleated-trouser` Camel Pleated Trouser 155 |
+| him | `sage-linen-overshirt` Sage Linen Overshirt 120 · `indigo-chore-coat` Indigo Chore Coat 175 · `charcoal-merino-crew` Charcoal Merino Crew 110 · `cream-cable-knit` Cream Cable Knit 135 | `grey-utility-cargo` Grey Utility Cargo 135 · `stone-pleated-trouser` Stone Pleated Trouser 150 · `black-straight-jean` Black Straight Jean 140 · `ecru-carpenter-pant` Ecru Carpenter Pant 130 |
+| her | `ivory-silk-shirt` Ivory Silk Shirt 125 · `black-cropped-blazer` Black Cropped Blazer 190 · `terracotta-rib-cardigan` Terracotta Rib Cardigan 115 · `oatmeal-funnel-knit` Oatmeal Funnel Knit 140 | `cream-wide-trouser` Cream Wide-Leg Trouser 145 · `black-midi-skirt` Black Midi Skirt 120 · `indigo-wide-jean` Indigo Wide Jean 150 · `camel-pleated-trouser` Camel Pleated Trouser 155 |
 
-- [ ] **Step 1:** In Flow (Nano Banana 2.1, 9:16, Agent off, see memory notes) make the **him** base photo: full-length studio photo of a man, front-facing, arms relaxed at sides, white sneakers, plain light grey seamless backdrop, wearing `rust-coach-jacket` (attach `flow/rack/rust-coach-jacket-front.jpg`) and grey utility cargo trousers. No text or logos.
-- [ ] **Step 2:** Make 2 edits from the base: attach base + `flow/rack/navy-varsity-jacket-front.jpg`, "the exact same person, pose, framing, lighting and backdrop; change only the jacket to the attached one"; same for trousers → stone pleated trouser (text description).
+- [ ] **Step 0:** 16 packshots in Flow: ghost-mannequin front view, solid magenta `#FF00FF` backdrop, no hanger, centred. Save to `flow/fitting/tops/<id>.jpg` and `flow/fitting/bottoms/<id>.jpg`.
+- [ ] **Step 1:** In Flow (Nano Banana 2.1, 9:16, Agent off, see memory notes) make the **him** base photo: full-length studio photo of a man, front-facing, arms relaxed at sides, white sneakers, plain light grey seamless backdrop, wearing `sage-linen-overshirt` + `grey-utility-cargo` (both packshots attached). No text or logos.
+- [ ] **Step 2:** Make 2 edits from the base: attach base + the `indigo-chore-coat` packshot, "the exact same person, pose, framing, lighting and backdrop; change only the top to the attached one"; same for trousers → `stone-pleated-trouser` packshot.
 - [ ] **Step 3: Gate.** Overlay the 3 (difference blend). Pass = person within ~1% of image size, backdrop tone even. View one at section size against `--bg`. If it fails, show the user before making more.
-- [ ] **Step 4:** Make the remaining 13 him + 16 her combinations the same way (her base: woman, flat shoes, `burgundy-track-jacket` + cream wide-leg trousers), and 8 bottom packshots (ghost-mannequin front, magenta `#FF00FF` backdrop). Save originals as in Files.
-- [ ] **Step 5:** Write `flow/fitting.py`: outfits → 768 × 1376 WebP q86 (crop/scale to 9:16, no cutout); bottoms → `cutout()` imported from `flow/cutout.py`, trimmed to content, centred on a transparent 800 × 1000 canvas. Print the sampled backdrop colour (median of the 40 px top corners) of `him` and `her` base photos.
-- [ ] **Step 6:** Run `python flow/fitting.py`; expect 32 + 8 WebPs and two hex colours. Check 3 random ones by eye.
+- [ ] **Step 4:** Make the remaining 13 him + 16 her combinations the same way (her base: woman, flat shoes, `ivory-silk-shirt` + `cream-wide-trouser`). Save originals as in Files.
+- [ ] **Step 5:** Write `flow/fitting.py`: outfits → 768 × 1376 WebP q86 (crop/scale to 9:16, no cutout); tops and bottoms → `cutout()` imported from `flow/cutout.py`, trimmed to content, centred on a transparent 800 × 1000 canvas. Print the sampled backdrop colour (median of the 40 px top corners) of `him` and `her` base photos.
+- [ ] **Step 6:** Run `python flow/fitting.py`; expect 32 + 16 WebPs and two hex colours. Check 3 random ones by eye.
 - [ ] **Step 7: Commit** `git add flow/fitting flow/fitting.py public/fitting && git commit -m "Add Flow images for the fitting room"`
 
 ### Task 2: Data and pure helpers
@@ -62,9 +63,9 @@
 
 **Interfaces:**
 - Produces (`src/data/fitting.ts`):
-  - `interface Bottom { id: string; name: string; price: number }`
-  - `interface FitModel { id: 'him' | 'her'; name: string; tops: string[]; bottoms: Bottom[]; backdrop: string }` (`backdrop` = hex from Task 1 Step 6)
-  - `const FIT_MODELS: FitModel[]` (him first); tops resolve through `RACK` from `rack.ts`
+  - `interface Piece { id: string; name: string; price: number }`
+  - `interface FitModel { id: 'him' | 'her'; name: string; tops: Piece[]; bottoms: Piece[]; backdrop: string }` (`backdrop` = hex from Task 1 Step 6)
+  - `const FIT_MODELS: FitModel[]` (him first); `pieceSrc(kind: 'tops' | 'bottoms', id: string)` → `/fitting/${kind}/${id}.webp` in `headswap.ts`
   - `const TOP_SIZES = ['XS','S','M','L','XL']`, `const BOTTOM_SIZES = ['28','30','32','34','36']`
 - Produces (`src/lib/headswap.ts`):
   - `outfitSrc(model: string, top: string, bottom: string): string` → `/fitting/${model}/${top}__${bottom}.webp`
@@ -89,9 +90,10 @@ test('error event and junk', () => {
   assert.equal(parseSwapStream('event: complete\ndata: not json\n\n')?.ok, false);
   assert.equal(parseSwapStream('event: heartbeat\ndata: null\n\n'), null);
 });
-test('every model has 4 tops in RACK and 4 bottoms', () => {
+test('every model has 4 new tops and 4 bottoms', () => {
   for (const m of FIT_MODELS) { assert.equal(m.tops.length, 4); assert.equal(m.bottoms.length, 4);
-    for (const t of m.tops) assert.ok(RACK.some((p) => p.id === t)); }
+    for (const t of m.tops) assert.ok(!RACK.some((p) => p.id === t.id)); }
+  assert.equal(pieceSrc('tops', 'x'), '/fitting/tops/x.webp');
 });
 ```
 
@@ -107,12 +109,12 @@ test('every model has 4 tops in RACK and 4 bottoms', () => {
 - Modify: `src/App.tsx` (render `<FittingRoom onAddToBag={add} />` after `<Rack>`), `src/components/Header.tsx` (nav)
 
 **Interfaces:**
-- Consumes: `FIT_MODELS`, `TOP_SIZES`, `BOTTOM_SIZES`, `RACK`, `formatPrice`, `outfitSrc`.
+- Consumes: `FIT_MODELS`, `TOP_SIZES`, `BOTTOM_SIZES`, `formatPrice`, `outfitSrc`, `pieceSrc`.
 - Produces: `FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => void })`; inside it, a `photoFor(key)` seam that Task 4 overrides (state `swapped: Map<string, string>`; shown image = `swapped.get(outfitKey(...)) ?? outfitSrc(...)`).
 
 - [ ] **Step 1:** Header: replace `NAV`/`HREF`/observer ternary with one list `SECTIONS = [{ id: 'runway', label: 'Runway' }, { id: 'rail', label: 'Rail' }, { id: 'fitting', label: 'Fitting Room' }]`; nav order `Home, Runway, Rail, Fitting Room, Denim, Atelier`; observer observes every `SECTIONS` id and sets the matching label.
 - [ ] **Step 2:** Section `<section className="fit" id="fitting" aria-label="Fitting room" style={{ '--backdrop': model.backdrop }}>`, height like `.rack` (`100dvh - var(--header-h)`, min 560px), background `var(--backdrop)`. Title "Fitting Room" top-left, `Him | Her` pill toggle (`aria-pressed`), "Try it on me" button top-right (Task 4 wires it).
-- [ ] **Step 3:** Layout per the spec sketch: grid of 3 columns; left and right columns each hold 2 tops (top row) and 2 bottoms (row below); centre holds the model `<img>` (aspect 768/1376, height ≈ section height − 120px) with edges faded by `mask-image: linear-gradient(...)` on all four sides. Pieces are `<button aria-pressed aria-label="name, price">` with the Rail front shot / bottom packshot; worn ones get a ring.
+- [ ] **Step 3:** Layout per the spec sketch: grid of 3 columns; left and right columns each hold 2 tops (top row) and 2 bottoms (row below); centre holds the model `<img>` (aspect 768/1376, height ≈ section height − 120px) with edges faded by `mask-image: linear-gradient(...)` on all four sides. Pieces are `<button aria-pressed aria-label="name, price">` with the piece's packshot; worn ones get a ring.
 - [ ] **Step 4:** Clicking a non-worn piece wears it; the model image cross-fades (two stacked `<img>`, opacity transition 350ms, preload next with `new Image()` + `decode()` before swapping). Clicking the worn piece opens the drawer. Caption under the model: "Jacket: <name> · Trouser: <name>" (names are buttons that open the drawer); a visually hidden `aria-live="polite"` region announces outfit changes.
 - [ ] **Step 5:** Drawer: right-side panel `role="dialog" aria-modal aria-label={name}`, product image, name, price, size chips (`TOP_SIZES` or `BOTTOM_SIZES`), CTA copy exactly like the Rail ("Select a size" / "Add to bag, M" / "Added to bag") calling `onAddToBag(1)`. Focus to the close button on open, back to the piece on close. Escape/Left/Right handled in a capture-phase `keydown` listener with `stopImmediatePropagation` while open (copy the Rack pattern).
 - [ ] **Step 6:** Phones (≤ 767px): model first, then the tops row and bottoms row as horizontal scroll strips (`overflow-x: auto; scroll-snap-type: x mandatory`), drawer as a bottom sheet.
