@@ -36,3 +36,12 @@ export function nextJob(running: string | null, queued: string | null, pick: str
   if (running) return { start: null, queued: pick };
   return { start: pick, queued: null };
 }
+
+export type Job = { running: string | null; queued: string | null };
+
+/** The job state after the visitor lands on outfit `key`. Nothing is swapped while they look at the model. */
+export function queuePick(job: Job, key: string, done: Set<string>, active: boolean): Job {
+  if (!active) return job;
+  const n = nextJob(job.running, job.queued, key, done);
+  return n.start ? { running: n.start, queued: null } : { running: job.running, queued: n.queued };
+}

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { nextJob, outfitSrc, outfitKey, parseSwapStream, pieceSrc } from './headswap.ts';
+import { nextJob, queuePick, outfitSrc, outfitKey, parseSwapStream, pieceSrc } from './headswap.ts';
 import { FIT_MODELS } from '../data/fitting.ts';
 import { RACK } from '../data/rack.ts';
 
@@ -36,4 +36,11 @@ test('queue keeps only the latest pick', () => {
   assert.deepEqual(nextJob('a', 'b', 'c', new Set()), { start: null, queued: 'c' });
   assert.deepEqual(nextJob(null, null, 'a', new Set(['a'])), { start: null, queued: null });
   assert.deepEqual(nextJob('a', 'b', 'a', new Set()), { start: null, queued: null });
+});
+
+test('no swap is queued while the visitor is looking at the model', () => {
+  const idle = { running: null, queued: null };
+  assert.deepEqual(queuePick(idle, 'a', new Set(), false), idle);
+  assert.deepEqual(queuePick(idle, 'a', new Set(), true), { running: 'a', queued: null });
+  assert.deepEqual(queuePick({ running: 'a', queued: null }, 'b', new Set(), true), { running: 'a', queued: 'b' });
 });

@@ -3,7 +3,7 @@ import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { BOTTOM_SIZES, FIT_MODELS, TOP_SIZES } from '../data/fitting';
 import { formatPrice } from '../data/looks';
 import type { Piece } from '../data/rack';
-import { nextJob, outfitKey, outfitSrc, pieceSrc } from '../lib/headswap';
+import { type Job, outfitKey, queuePick, outfitSrc, pieceSrc } from '../lib/headswap';
 import { headSwap } from '../lib/swapClient';
 import { TryOn } from './TryOn';
 import './FittingRoom.css';
@@ -33,20 +33,18 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
   const [swapped, setSwapped] = useState<Map<string, string>>(() => new Map());
   const swappedRef = useRef(swapped);
   swappedRef.current = swapped;
-  const [job, setJob] = useState<{ running: string | null; queued: string | null }>({ running: null, queued: null });
+  const [job, setJob] = useState<Job>({ running: null, queued: null });
   const [onMe, setOnMe] = useState(true);
   const [tryOpen, setTryOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const abort = useRef<AbortController | null>(null);
+  const onMeRef = useRef<HTMLButtonElement>(null);
   const busyTimer = useRef(0);
 
-  useEffect(() => {
-    if (!face) return;
-    setJob((j) => {
-      const n = nextJob(j.running, j.queued, key, new Set(swappedRef.current.keys()));
-      return n.start ? { running: n.start, queued: null } : { running: j.running, queued: n.queued };
-    });
-  }, [key, face]);
+  // Only while the visitor is looking at themselves (no hidden uploads under "On the model").
+  // Switching back to "On me" also retries an outfit that failed.
+  const want = () => setJob((j) => queuePick(j, key, new Set(swappedRef.current.keys()), face !== null && onMe));
+  useEffect(want, [key, face, onMe]);
 
   useEffect(() => {
     const k = job.running;
@@ -193,7 +191,7 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
             {face ? (
               <>
                 <div className="fit__models" role="group" aria-label="Show the outfit">
-                  <button type="button" aria-pressed={onMe} onClick={() => setOnMe(true)}>
+                  <button type="button" ref={onMeRef} aria-pressed={onMe} onClick={() => setOnMe(true)}>
                     On me
                   </button>
                   <button type="button" aria-pressed={!onMe} onClick={() => setOnMe(false)}>
@@ -247,7 +245,19 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
               </button>
             </>
           ) : busy ? (
-            'The free try-on service is busy. Try again in a minute.'
+            <>
+              The free try-on service is busy. Try again in a minute.{' '}
+              <button
+                className="fit__link"
+                type="button"
+                onClick={() => {
+                  setBusy(false);
+                  want();
+                }}
+              >
+                Try again
+              </button>
+            </>
           ) : null}
         </p>
         <p className="fit__live" aria-live="polite">
@@ -261,7 +271,9 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
           onPhoto={(blob) => {
             setFace(blob);
             setOnMe(true);
-            close();
+            setTryOpen(false);
+            // The "Try it on me" button that opened the panel is gone now; land on "On me".
+            requestAnimationFrame(() => onMeRef.current?.focus());
           }}
         />
       )}
