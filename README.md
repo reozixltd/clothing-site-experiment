@@ -37,6 +37,7 @@ Needs Node 22.18 or newer (`npm test` runs the TypeScript test file directly).
 | Phone layout | Three models on stage, rail moves below, nav becomes a scrollable row |
 | Fitting Room | Scroll two sliding carousels of tops and bottoms and the model wears the centre pieces; click the model for sizes; "Try it on me" puts your own head on the model |
 | Shoes | Scroll a diagonal line of floating shoes; click the front one for a product view with sizes, thumbnails and Add to bag |
+| Bags | "One model. Every bag.": scroll a diagonal line of bags behind one model and she holds each bag in turn |
 
 ## Folder structure
 
@@ -66,6 +67,7 @@ src/
     FittingRoom.tsx / .css  the fitting room section
     TryOn.tsx            the "Try it on me" photo panel
     Shoes.tsx / .css     the shoe line-up and its product view
+    Bags.tsx / .css      "One model. Every bag."
   styles/
     tokens.css           colours, radius, font, timing
     base.css             reset, focus ring, reduced-motion rule
@@ -73,6 +75,7 @@ render.html              dev-only page that renders 3D models as line-up images
 flow/                    the original Google Flow images and turntable video, sources of public/
   fitting/               fitting room originals; fitting.py turns them into public/fitting/
   shoes/                 shoe packshots; fitting.py turns them into public/shoes/
+  bags/                  bag packshots and model/<id>.jpg (the model holding that bag); fitting.py turns them into public/bags/
 public/
   looks/                 cutout of each model, used in the line-up and detail view
   products/              product photos (packshots, originals in flow/products/)
@@ -80,6 +83,7 @@ public/
   models/<folder>/       optional 3D models (model.fbx plus textures), currently unused
   fitting/               outfit photos (<model>/<top>__<bottom>.webp) and garment cutouts (tops/, bottoms/)
   shoes/                 shoe cutouts, 1000 x 640, all standing on one ground line
+  bags/                  bag cutouts, 800 x 800, and model/<id>.webp, the model cut out, all framed alike
 ```
 
 ## The model images
@@ -287,6 +291,21 @@ The carousel moves (wheel, swipe, keys) are shared with the fitting room in `src
 To add a shoe: one Flow packshot on magenta, side view with the toe pointing left, saved as
 `flow/shoes/<id>.jpg`; run `python flow/fitting.py`; add a row to `src/data/shoes.ts`.
 
+## Bags (`#bags`)
+
+The fifth section. The headline "One model. Every bag." sits behind one model; small bags hang on a
+diagonal line behind her, the active bag's name, note, price and Add to bag sit bottom left, and a
+card top right shows the active bag. Each scroll step (or swipe, arrow key, arrow button, or click on a
+bag in the line) slides the line one bag on and cross-fades to the photo of her holding that bag. It
+uses the same `useCarousel` as the shoes, so the wheel lets the page go at the first and last bag.
+
+Every model photo was made in Flow from the first one ("the exact same photo, only change the bag")
+with that bag's packshot attached, so she, her pose and the framing stay put and only the bag changes.
+
+To add a bag: a Flow packshot on magenta saved as `flow/bags/<id>.jpg`; a photo of her holding it, made
+the same way, saved as `flow/bags/model/<id>.jpg`; run `python flow/fitting.py`; add a row to
+`src/data/bags.ts`.
+
 ## Design tokens
 
 Everything visual is set in `src/styles/tokens.css`:
@@ -306,8 +325,9 @@ Everything visual is set in `src/styles/tokens.css`:
 
 ## Not included
 
-- The other nav pages. Runway, Rail, Fitting Room and Shoes are sections of the one page; the other links go nowhere.
+- The other nav pages. Runway, Rail, Fitting Room, Shoes and Bags are sections of the one page; the other links go nowhere.
 - "See availability" from the reference rail design (no stock data).
 - Search, account, cart contents and checkout. The buttons are there, the features are not.
 - A dark theme.
+- The bag reference's intro loader (bags in a ring counting to 100).
 - Prices are sample data.

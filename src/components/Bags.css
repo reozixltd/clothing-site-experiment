@@ -1,0 +1,203 @@
+/*
+ * "One model. Every bag." (Bags.tsx). Back to front: the headline, the diagonal line of bags
+ * (each placed by its slot --n, distance from the bag in her hand), then the model.
+ */
+.bags {
+  --w: clamp(96px, 12vw, 190px); /* one bag on the line */
+  --dx: 15vw; /* one slot along the diagonal */
+  --dy: 11svh;
+  position: relative;
+  height: calc(100svh - var(--header-h));
+  min-height: 560px;
+  overflow: hidden;
+  background: var(--bg);
+  scroll-margin-top: var(--header-h);
+}
+
+.bags__stage {
+  position: absolute;
+  inset: 0;
+  touch-action: pan-y;
+}
+
+.bags__stage:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -6px;
+}
+
+.bags__title {
+  position: absolute;
+  top: clamp(16px, 4vh, 40px);
+  left: 0;
+  right: 0;
+  font-size: clamp(44px, 10.5vw, 190px);
+  font-weight: 700;
+  line-height: 0.88;
+  letter-spacing: -0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.bags__line {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bags__slot {
+  position: absolute;
+  top: 58%;
+  left: 50%;
+  width: var(--w);
+  margin: calc(var(--w) / -2) 0 0 calc(var(--w) / -2);
+  transform: translate(calc(var(--n) * var(--dx)), calc(var(--n) * var(--dy))) scale(calc(1 - var(--a) * 0.08));
+  /* The bag in her hand leaves the line; the far ends fade out. */
+  opacity: clamp(0, min(var(--a), 3.4 - var(--a)), 1);
+  transition:
+    transform var(--slide) var(--ease),
+    opacity 420ms var(--ease);
+}
+
+.bags__slot[data-wrap='true'] {
+  transition: none;
+  animation: piece-in 520ms var(--ease);
+}
+
+.bags__slot button,
+.bags__slot img {
+  display: block;
+  width: 100%;
+}
+
+.bags__slot img {
+  filter: drop-shadow(0 14px 14px rgb(21 21 23 / 0.16));
+  user-select: none;
+}
+
+.bags__model {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  height: 90%;
+  translate: -50% 0;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 420ms var(--ease);
+}
+
+.bags__model[data-on='true'] {
+  opacity: 1;
+}
+
+.bags__info {
+  position: absolute;
+  left: var(--gutter);
+  bottom: 28px;
+  z-index: 20;
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  width: min(280px, 100% - 2 * var(--gutter));
+  animation: shoe-info 420ms var(--ease);
+}
+
+.bags__name {
+  font-size: clamp(26px, 3vw, 44px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.bags__note,
+.bags__price {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.bags__price {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.bags__card {
+  position: absolute;
+  top: 20px;
+  right: var(--gutter);
+  z-index: 20;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  width: 104px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  animation: shoe-info 420ms var(--ease);
+}
+
+.bags__card img {
+  display: block;
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bags__slot,
+  .bags__slot[data-wrap='true'],
+  .bags__info,
+  .bags__card {
+    transition: opacity var(--quick);
+    animation: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .bags {
+    --w: 22vw;
+    --dx: 27vw;
+    --dy: 9svh;
+  }
+
+  .bags__title {
+    top: 76px;
+  }
+
+  .bags__model {
+    height: 66%;
+    bottom: 22%;
+  }
+
+  .bags__slot {
+    top: 46%;
+  }
+
+  /* A soft panel so the text reads over her trousers. */
+  .bags__info {
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 14px var(--gutter) 16px;
+    gap: 4px;
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+  }
+
+  .bags__card {
+    top: 12px;
+    width: 64px;
+    padding: 6px;
+  }
+
+  /* The arrows sit beside the bag button, at the panel's bottom right. */
+  .bags__info .fit__cta {
+    width: calc(100% - 104px);
+  }
+
+  .bags .shoes__nav {
+    bottom: 16px;
+  }
+}

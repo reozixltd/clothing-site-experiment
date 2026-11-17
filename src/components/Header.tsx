@@ -8,6 +8,7 @@ const SECTIONS = [
   { id: 'rail', label: 'Rail' },
   { id: 'fitting', label: 'Fitting Room' },
   { id: 'shoes', label: 'Shoes' },
+  { id: 'bags', label: 'Bags' },
 ];
 const NAV = ['Home', ...SECTIONS.map((s) => s.label), 'Denim', 'Atelier'];
 const HREF = Object.fromEntries(SECTIONS.map((s) => [s.label, `#${s.id}`]));

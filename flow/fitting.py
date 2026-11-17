@@ -2,7 +2,7 @@
 
 Outfit photos flow/fitting/<model>/<top>__<bottom>.jpg -> public/fitting/<model>/...webp (768 x 1376,
 backdrop kept). Packshots flow/fitting/tops|bottoms/<id>.jpg (magenta backdrop) -> transparent
-800 x 1000 cutouts in public/fitting/tops|bottoms/. Shoe packshots flow/shoes/<id>.jpg -> public/shoes/. Prints each model's backdrop colour for fitting.ts.
+800 x 1000 cutouts in public/fitting/tops|bottoms/. Shoe packshots flow/shoes/<id>.jpg -> public/shoes/. Bags flow/bags/ -> public/bags/. Prints each model's backdrop colour for fitting.ts.
 """
 import glob
 import os
@@ -26,7 +26,8 @@ def fit(im, w, h):
     return im.crop((l, t, l + cw, t + ch)).resize((w, h), Image.LANCZOS)
 
 
-def packshot(src, dst, W=W, H=H, floor=False):
+def keyed(src):
+    """The magenta backdrop cut away, edges cleaned."""
     im = cutout(src)
     im.putalpha(im.getchannel('A').filter(ImageFilter.MinFilter(3)))
     # Drop the pink fringe: on soft edge pixels, magenta shows as red and blue above green.
@@ -35,7 +36,11 @@ def packshot(src, dst, W=W, H=H, floor=False):
     g = a[..., 1]
     a[..., 0] = np.where(edge, np.minimum(a[..., 0], g + 20), a[..., 0])
     a[..., 2] = np.where(edge, np.minimum(a[..., 2], g), a[..., 2])
-    im = Image.fromarray(a.astype(np.uint8), 'RGBA')
+    return Image.fromarray(a.astype(np.uint8), 'RGBA')
+
+
+def packshot(src, dst, W=W, H=H, floor=False):
+    im = keyed(src)
     box = (np.asarray(im.getchannel('A')) > 24)
     ys, xs = np.nonzero(box)
     part = im.crop((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1))
@@ -54,6 +59,16 @@ def shoes():
         packshot(src, f'public/shoes/{os.path.basename(src)[:-4]}.webp', 1000, 640, floor=True)
 
 
+def bags():
+    """flow/bags/<id>.jpg -> 800 x 800 cutouts in public/bags/; flow/bags/model/<id>.jpg (the model
+    holding that bag, magenta backdrop) -> full-frame cutouts in public/bags/model/, so every photo lines up."""
+    os.makedirs('public/bags/model', exist_ok=True)
+    for src in sorted(glob.glob('flow/bags/*.jpg')):
+        packshot(src, f'public/bags/{os.path.basename(src)[:-4]}.webp', 800, 800)
+    for src in sorted(glob.glob('flow/bags/model/*.jpg')):
+        keyed(src).save(f'public/bags/model/{os.path.basename(src)[:-4]}.webp', quality=86, method=6)
+
+
 def main():
     n = 0
     for src in sorted(glob.glob('flow/fitting/*/*.jpg')):
@@ -66,6 +81,7 @@ def main():
             fit(Image.open(src).convert('RGB'), OW, OH).save(dst, quality=86, method=6)
         n += 1
     shoes()
+    bags()
     print(f'{n} images')
     for model, base in BASES.items():
         a = np.asarray(Image.open(f'flow/fitting/{model}/{base}.jpg').convert('RGB'))
