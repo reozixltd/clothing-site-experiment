@@ -13,7 +13,7 @@ const SECTIONS = [
 const NAV = ['Home', ...SECTIONS.map((s) => s.label), 'Denim', 'Atelier'];
 const HREF = Object.fromEntries(SECTIONS.map((s) => [s.label, `#${s.id}`]));
 
-export function Header({ bagCount }: { bagCount: number }) {
+export function Header({ bagCount, onOpenBag }: { bagCount: number; onOpenBag: () => void }) {
   // The section filling most of the screen is the current page.
   const [page, setPage] = useState('Runway');
   useEffect(() => {
@@ -48,9 +48,13 @@ export function Header({ bagCount }: { bagCount: number }) {
         <button className="header__icon" type="button" aria-label="Account">
           <User aria-hidden />
         </button>
-        <button className="header__icon" type="button" aria-label={`Bag, ${bagCount} items`}>
+        <button className="header__icon" type="button" data-bag-button onClick={onOpenBag} aria-label={`Bag, ${bagCount} items`}>
           <ShoppingBag aria-hidden />
-          {bagCount > 0 && <span className="header__count">{bagCount}</span>}
+          {bagCount > 0 && (
+            <span className="header__count" key={bagCount}>
+              {bagCount}
+            </span>
+          )}
         </button>
       </div>
     </header>

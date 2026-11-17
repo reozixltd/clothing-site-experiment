@@ -8,6 +8,7 @@ import { useCarousel } from '../lib/useCarousel';
 import { headSwap } from '../lib/swapClient';
 import { TryOn } from './TryOn';
 import './FittingRoom.css';
+import type { NewItem } from '../lib/cart';
 
 type Kind = 'tops' | 'bottoms';
 type Wear = { top: string; bottom: string };
@@ -18,7 +19,7 @@ type Wear = { top: string; bottom: string };
  * that slides into the centre is what the model is wearing (a cross-fade to that outfit's Flow
  * photo). Click the model (or the caption) for sizes and Add to bag.
  */
-export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => void }) {
+export function FittingRoom({ onAddToBag }: { onAddToBag: (item: NewItem) => void }) {
   const [modelId, setModelId] = useState<'him' | 'her'>('him');
   const model = FIT_MODELS.find((m) => m.id === modelId)!;
   const [wear, setWear] = useState<Record<string, Wear>>(() =>
@@ -304,7 +305,7 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
             type="button"
             disabled={!size || added}
             onClick={() => {
-              onAddToBag(1);
+              onAddToBag({ id: open.piece.id, name: open.piece.name, price: open.piece.price, image: pieceSrc(open.kind, open.piece.id), size: size! });
               setAdded(true);
             }}
           >

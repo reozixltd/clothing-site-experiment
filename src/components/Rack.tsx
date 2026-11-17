@@ -3,6 +3,7 @@ import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { formatPrice } from '../data/looks';
 import type { Piece } from '../data/rack';
 import './Rack.css';
+import type { NewItem } from '../lib/cart';
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
 const TOUCH = matchMedia('(hover: none)').matches;
@@ -12,7 +13,7 @@ const shot = (p: Piece, view: 'front' | 'back' | 'side') => `/rack/${p.id}-${vie
 
 interface Props {
   pieces: Piece[];
-  onAddToBag: (items: number) => void;
+  onAddToBag: (item: NewItem) => void;
 }
 
 /**
@@ -148,7 +149,7 @@ export function Rack({ pieces, onAddToBag }: Props) {
               type="button"
               disabled={!size || added}
               onClick={() => {
-                onAddToBag(1);
+                onAddToBag({ id: piece.id, name: piece.name, price: piece.price, image: shot(piece, 'front'), size: size! });
                 setAdded(true);
               }}
             >

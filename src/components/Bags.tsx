@@ -5,6 +5,7 @@ import { BAGS } from '../data/bags';
 import { formatPrice } from '../data/looks';
 import { useCarousel } from '../lib/useCarousel';
 import './Bags.css';
+import type { NewItem } from '../lib/cart';
 
 const pack = (id: string) => `/bags/${id}.webp`;
 const worn = (id: string) => `/bags/model/${id}.webp`;
@@ -16,7 +17,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
  * own pose for it, with a shimmer over her as it changes. The first time the section comes into
  * view, the bags swirl in a ring while a counter runs to 100.
  */
-export function Bags({ onAddToBag }: { onAddToBag: (items: number) => void }) {
+export function Bags({ onAddToBag }: { onAddToBag: (item: NewItem) => void }) {
   const [active, setActive] = useState(0);
   const [added, setAdded] = useState(false);
   // ponytail: the wheel stops at the first and last bag so the page can scroll on; arrows and clicks loop.
@@ -94,7 +95,7 @@ export function Bags({ onAddToBag }: { onAddToBag: (items: number) => void }) {
           type="button"
           disabled={added}
           onClick={() => {
-            onAddToBag(1);
+            onAddToBag({ id: bag.id, name: bag.name, price: bag.price, image: pack(bag.id) });
             setAdded(true);
           }}
         >

@@ -69,6 +69,41 @@
   color: var(--muted);
 }
 
+.rail__text {
+  flex: 1;
+}
+
+/* Add one piece: a round icon button at the end of its row. */
+.rail__add {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+  font-size: 16px;
+  transition:
+    background-color var(--quick),
+    border-color var(--quick),
+    color var(--quick),
+    transform var(--quick) var(--ease);
+}
+
+.rail__add:hover {
+  border-color: var(--ink);
+}
+
+.rail__add:active {
+  transform: scale(0.92);
+}
+
+.rail__add[data-added='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+}
+
 .rail__buy {
   margin-top: auto;
   display: grid;

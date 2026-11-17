@@ -4,6 +4,7 @@ import { formatPrice } from '../data/looks';
 import { SHOES, SHOE_SIZES } from '../data/shoes';
 import { useCarousel } from '../lib/useCarousel';
 import './Shoes.css';
+import type { NewItem } from '../lib/cart';
 
 const src = (id: string) => `/shoes/${id}.webp`;
 
@@ -12,7 +13,7 @@ const src = (id: string) => `/shoes/${id}.webp`;
  * the same line becomes the product view: that shoe large on the left, sizes and Add to bag on the
  * right, and every other shoe slides in from the side when picked.
  */
-export function Shoes({ onAddToBag }: { onAddToBag: (items: number) => void }) {
+export function Shoes({ onAddToBag }: { onAddToBag: (item: NewItem) => void }) {
   const [active, setActive] = useState(0);
   const [open, setOpen] = useState(false);
   const [size, setSize] = useState<string | null>(null);
@@ -89,7 +90,7 @@ export function Shoes({ onAddToBag }: { onAddToBag: (items: number) => void }) {
               type="button"
               disabled={!size || added}
               onClick={() => {
-                onAddToBag(1);
+                onAddToBag({ id: shoe.id, name: shoe.name, price: shoe.price, image: src(shoe.id), size: `EU ${size}` });
                 setAdded(true);
               }}
             >

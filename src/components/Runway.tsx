@@ -5,6 +5,7 @@ import { type Direction, didWrap, mod, slotOf } from '../lib/carousel';
 import { Figure } from './Figure';
 import { LookRail } from './LookRail';
 import './Runway.css';
+import type { NewItem } from '../lib/cart';
 
 interface Position {
   index: number;
@@ -13,7 +14,7 @@ interface Position {
 
 interface Props {
   looks: Look[];
-  onAddToBag: (items: number) => void;
+  onAddToBag: (item: NewItem) => void;
 }
 
 /**

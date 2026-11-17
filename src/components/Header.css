@@ -101,6 +101,17 @@
   text-align: center;
 }
 
+/* A pop each time the count changes (keyed in Header.tsx). */
+.header__count {
+  animation: count-pop 420ms var(--ease);
+}
+
+@keyframes count-pop {
+  40% {
+    scale: 1.35;
+  }
+}
+
 /* Phone: the nav drops to its own scrollable row, search shrinks to an icon. */
 @media (max-width: 767px) {
   .header {
