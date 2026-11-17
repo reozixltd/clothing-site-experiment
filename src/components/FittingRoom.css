@@ -68,9 +68,9 @@
 }
 
 .fit__floor {
-  /* The model photo is drawn 1.2x the floor height and cropped at the shins, as in the reference.
+  /* The model photo fills the floor height, head to feet.
      --model-w is that photo's width; --body is the person inside it (the rest is wall). */
-  --zoom: 1.2;
+  --zoom: 1;
   --model-w: calc((100cqh - 120px) * 0.558 * var(--zoom));
   --body: calc(var(--model-w) * 0.46);
   --tile: calc(var(--model-w) * 0.4); /* a piece at about body scale */
@@ -98,11 +98,11 @@
 
 /* Each row runs through the model: tops at her chest, bottoms at her legs. */
 .fit__row--tops {
-  top: calc(var(--tops-y, 40%) - var(--tile) * 0.625);
+  top: calc(var(--tops-y, 32%) - var(--tile) * 0.625);
 }
 
 .fit__row--bottoms {
-  top: calc(var(--bottoms-y, 84%) - var(--tile) * 0.625);
+  top: calc(var(--bottoms-y, 68%) - var(--tile) * 0.625);
 }
 
 /*
@@ -198,7 +198,7 @@
  */
 .fit__stage {
   overflow: hidden;
-  mask-image: linear-gradient(transparent, #000 60px, #000 calc(100% - 40px), transparent);
+  mask-image: linear-gradient(transparent, #000 8px, #000 calc(100% - 8px), transparent);
 }
 
 .fit__model {
