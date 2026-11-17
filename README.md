@@ -257,7 +257,8 @@ and asking for the same person, pose, framing and backdrop wearing the new piece
 Flow packshots on magenta. `python flow/fitting.py` turns `flow/fitting/` into `public/fitting/` (outfits
 768 x 1376 WebP, cutouts 800 x 1000 transparent). It cuts the model out of the beige studio
 wall and floor with `rembg` (isnet-general-use, `pip install rembg`, about 10 s a photo on CPU, free) and
-puts them on that grey, feet and all, with a faint shadow under the shoes.
+puts them on that grey, feet and all, with a faint shadow under the shoes. It also saves each silhouette small
+(`<model>/mask/`) for the shimmer that runs up the model when the outfit changes.
 
 To add a garment: one packshot, plus one outfit photo for every piece it can be worn with (a new top for
 one model = 5 photos), named `<top>__<bottom>.jpg`. Check the head lines up with the base photo, or the

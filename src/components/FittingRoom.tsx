@@ -94,7 +94,7 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
   const working = face !== null && onMe && !mine && (job.running === key || job.queued === key);
 
   // Two stacked photos: the next one loads and decodes underneath, then fades in.
-  const [layers, setLayers] = useState({ a: src, b: src, front: 'a' as 'a' | 'b' });
+  const [layers, setLayers] = useState({ a: src, b: src, front: 'a' as 'a' | 'b', changes: 0 });
   useEffect(() => {
     if (src === layers[layers.front]) return;
     let live = true;
@@ -104,7 +104,7 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
       if (!live) return;
       setLayers((l) => {
         const back = l.front === 'a' ? 'b' : 'a';
-        return { ...l, [back]: src, front: back };
+        return { ...l, [back]: src, front: back, changes: l.changes + 1 };
       });
     });
     return () => {
@@ -208,6 +208,15 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
                 draggable={false}
               />
             ))}
+            {/* The bags' shimmer (Bags.css), run over the new outfit's silhouette each time it changes. */}
+            {layers.changes > 0 && !layers[layers.front].startsWith('blob:') && (
+              <div
+                className="bags__magic fit__magic"
+                key={layers.changes}
+                aria-hidden
+                style={{ '--mask': `url(${layers[layers.front].replace(/([^/]+)$/, 'mask/$1')})` } as CSSProperties}
+              />
+            )}
           </div>
           <button
             className="fit__stagehit"

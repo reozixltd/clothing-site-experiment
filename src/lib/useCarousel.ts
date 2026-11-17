@@ -13,6 +13,7 @@ export function useCarousel<E extends HTMLElement>(count: number, active: number
   const [moving, setMoving] = useState(false);
   const lock = useRef(0);
   const wheel = useRef(0);
+  const quiet = useRef(0);
   const drag = useRef<{ x: number; id: number } | null>(null);
 
   const slots = Array.from({ length: count }, (_, i) => slotOf(i, active, dir, count));
@@ -37,6 +38,18 @@ export function useCarousel<E extends HTMLElement>(count: number, active: number
     const next = active + Math.sign(d);
     if (!loop && (next < 0 || next >= count)) return;
     e.preventDefault();
+    // Half on screen: the wheel first lines the section up, and the rest of that gesture (a trackpad's
+    // momentum) is swallowed, so scrolling the page past a carousel never steps it out of sight.
+    const sec = (e.currentTarget as HTMLElement).closest('section')!;
+    // Where scrollIntoView leaves it: just under the header (the page's scroll-padding-top, base.css).
+    const off = sec.getBoundingClientRect().top - (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0);
+    const now = performance.now();
+    if (Math.abs(off) > 4 || now < quiet.current) {
+      if (Math.abs(off) > 4 && now > quiet.current) sec.scrollIntoView({ behavior: 'smooth' });
+      quiet.current = now + 250;
+      wheel.current = 0;
+      return;
+    }
     if (moving) return;
     wheel.current += d;
     if (Math.abs(wheel.current) < 30) return;

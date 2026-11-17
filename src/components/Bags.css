@@ -12,7 +12,6 @@
   min-height: 560px;
   overflow: hidden;
   background: var(--bg);
-  scroll-margin-top: var(--header-h);
 }
 
 .bags__stage {

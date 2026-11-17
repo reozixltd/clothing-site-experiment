@@ -48,7 +48,7 @@ def regrey(im):
     sh = np.asarray(sh.filter(ImageFilter.GaussianBlur(10)), np.float32)[..., None] / 255
     bg = np.array(GREY, np.float32) * (1 - 0.35 * sh)
     a = al[..., None]
-    return Image.fromarray((a * np.asarray(im, np.float32) + (1 - a) * bg).round().astype(np.uint8))
+    return Image.fromarray((a * np.asarray(im, np.float32) + (1 - a) * bg).round().astype(np.uint8)), al
 
 def keyed(src):
     """The magenta backdrop cut away, edges cleaned."""
@@ -132,7 +132,13 @@ def main():
         if kind in ('tops', 'bottoms'):
             packshot(src, dst)
         else:
-            regrey(fit(Image.open(src).convert('RGB'), OW, OH)).save(dst, quality=86, method=6)
+            out, al = regrey(fit(Image.open(src).convert('RGB'), OW, OH))
+            out.save(dst, quality=86, method=6)
+            # The silhouette, small, for the shimmer as the outfit changes (FittingRoom.css .fit__magic).
+            os.makedirs(f'public/fitting/{kind}/mask', exist_ok=True)
+            m = Image.new('RGBA', (OW, OH), 'white')
+            m.putalpha(Image.fromarray((al * 255).round().astype(np.uint8)))
+            m.resize((192, 344), Image.LANCZOS).save(f'public/fitting/{kind}/mask/{name[:-4]}.webp', lossless=True)
         n += 1
     shoes()
     bags()

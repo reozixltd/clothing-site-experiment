@@ -221,6 +221,18 @@
   mask-image: linear-gradient(90deg, transparent, #000 32%, #000 68%, transparent);
 }
 
+/* The shimmer as the outfit changes: the bags' (Bags.css), on the photo's box here. */
+.fit__stage .fit__magic {
+  top: 0;
+  bottom: auto;
+  left: 0;
+  right: 0;
+  height: calc(100% * var(--zoom));
+  max-width: 100%;
+  margin: 0 auto;
+  translate: none;
+}
+
 .fit__model[data-front='true'] {
   opacity: 1;
   filter: none;
