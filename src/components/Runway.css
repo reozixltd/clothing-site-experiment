@@ -126,6 +126,40 @@
   }
 }
 
+/* The 360° badge beside the centre model's head (Figure.tsx). */
+.figure__360 {
+  position: absolute;
+  top: 6%;
+  left: 88%;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: rise 520ms var(--ease) 300ms backwards;
+}
+
+.figure__360 svg {
+  animation: spin-360 3.2s var(--ease) infinite;
+}
+
+@keyframes spin-360 {
+  0%,
+  60% {
+    rotate: 0deg;
+  }
+  100% {
+    rotate: 360deg;
+  }
+}
+
 /* Soft contact shadow on the studio floor. */
 .figure::after {
   content: '';

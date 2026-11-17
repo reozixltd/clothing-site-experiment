@@ -1,3 +1,4 @@
+import { ArrowsClockwise } from '@phosphor-icons/react';
 import { type CSSProperties, lazy, Suspense } from 'react';
 import { formatPrice, type Look } from '../data/looks';
 import { LAST_VISIBLE_SLOT } from '../lib/carousel';
@@ -48,6 +49,13 @@ export function Figure({ look, slot, enterFrom, showPins, activeProduct, onActiv
           <Suspense fallback={null}>
             <Model3D lookId={look.model} />
           </Suspense>
+        )}
+        {/* Tells the visitor the centre look can be turned all the way round. */}
+        {slot === 0 && (look.turn || look.model) && (
+          <span className="figure__360" aria-hidden>
+            <ArrowsClockwise weight="bold" />
+            360°
+          </span>
         )}
       </button>
 
