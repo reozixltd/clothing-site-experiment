@@ -6,6 +6,7 @@
   --w: clamp(96px, 12vw, 190px); /* one bag on the line */
   --dx: 15vw; /* one slot along the diagonal */
   --dy: 11svh;
+  --line-y: 58%; /* the line's height; the intro's ending lands on it too */
   position: relative;
   height: calc(100svh - var(--header-h));
   min-height: 560px;
@@ -48,7 +49,7 @@
 
 .bags__slot {
   position: absolute;
-  top: 58%;
+  top: var(--line-y);
   left: 50%;
   width: var(--w);
   margin: calc(var(--w) / -2) 0 0 calc(var(--w) / -2);
@@ -294,7 +295,7 @@
 }
 
 .bags__intro[data-phase='out'] .bags__ring li {
-  top: 58%;
+  top: var(--line-y);
   width: var(--w);
   translate: calc(-50% + var(--n) * var(--dx)) calc(-50% + var(--n) * var(--dy));
   scale: calc(1 - var(--a) * 0.08);
@@ -397,6 +398,7 @@
     --w: 22vw;
     --dx: 27vw;
     --dy: 9svh;
+    --line-y: 46%;
   }
 
   .bags__title {
@@ -421,10 +423,6 @@
 
   .bags__ring li {
     translate: calc(-50% + cos(var(--t)) * 36vw * var(--open)) calc(-50% + sin(var(--t)) * 16svh * var(--open));
-  }
-
-  .bags__slot {
-    top: 46%;
   }
 
   /* A soft panel so the text reads over her trousers. */
