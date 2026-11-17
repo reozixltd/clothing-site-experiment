@@ -19,7 +19,7 @@ export const FIT_MODELS: FitModel[] = [
   {
     id: 'him',
     name: 'Him',
-    backdrop: '#c8c3b8',
+    backdrop: '#ececea',
     tops: [
       { id: 'sage-linen-overshirt', name: 'Sage Linen Overshirt', price: 120 },
       { id: 'indigo-chore-coat', name: 'Indigo Chore Coat', price: 175 },
@@ -38,7 +38,7 @@ export const FIT_MODELS: FitModel[] = [
   {
     id: 'her',
     name: 'Her',
-    backdrop: '#cbc6bd',
+    backdrop: '#ececea',
     tops: [
       { id: 'ivory-silk-shirt', name: 'Ivory Silk Shirt', price: 125 },
       { id: 'black-cropped-blazer', name: 'Black Cropped Blazer', price: 190 },

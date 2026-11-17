@@ -242,7 +242,7 @@ and walks in from off stage (`@keyframes walk-in`).
 
 ## The Fitting Room (`#fitting`)
 
-The third section. One model stands centre stage on the colour of their own studio wall. Two looping
+The third section. One model stands centre stage on a flat light grey (`#ececea`), as in the reference. Two looping
 carousels run across them: five tops at chest height and five bottoms at leg height, two showing each side;
 the centre piece is the one being worn. Scroll (wheel or trackpad) over a row, swipe it, press the arrow
 keys, or click a piece and the row slides one step. The pieces float at about body scale with no cards,
@@ -255,8 +255,10 @@ sizes and Add to bag. Escape or the X closes it.
 = 25 photos per model, made with Nano Banana in Google Flow (0 credits) by attaching the base outfit photo
 and asking for the same person, pose, framing and backdrop wearing the new pieces. The garment cutouts are
 Flow packshots on magenta. `python flow/fitting.py` turns `flow/fitting/` into `public/fitting/` (outfits
-768 x 1376 WebP, cutouts 800 x 1000 transparent) and prints each model's wall colour for `backdrop` in
-`src/data/fitting.ts`.
+768 x 1376 WebP, cutouts 800 x 1000 transparent). It keys the beige studio wall out of every outfit photo
+(`regrey`: a smooth surface fitted to the wall beside the model) and fills it with that grey. The floor is
+too close to cream cloth to key, so the legs fade out just above the wall/floor line; desktop crops there
+anyway. A matting model such as `rembg` would keep the feet.
 
 To add a garment: one packshot, plus one outfit photo for every piece it can be worn with (a new top for
 one model = 5 photos), named `<top>__<bottom>.jpg`. Check the head lines up with the base photo, or the
