@@ -243,7 +243,7 @@ and walks in from off stage (`@keyframes walk-in`).
 ## The Fitting Room (`#fitting`)
 
 The third section. One model stands centre stage on a flat light grey (`#ececea`), as in the reference. Two looping
-carousels run across them: five tops at chest height and five bottoms at leg height, two showing each side;
+carousels run across them: seven tops at chest height and seven bottoms at leg height, two showing each side and the rest waiting off stage, so the loop never shows its end;
 the centre piece is the one being worn. Scroll (wheel or trackpad) over a row, swipe it, press the arrow
 keys, or click a piece and the row slides one step. The pieces float at about body scale with no cards,
 and fade the further they are from the model. The incoming piece slides into the model and dissolves
@@ -251,8 +251,8 @@ while the photo cross-fades (with a blur) to that outfit; the piece she was wear
 Him / Her switches model; each keeps their own outfit. Click the model (or a piece's name under them) for
 sizes and Add to bag. Escape or the X closes it.
 
-**No virtual try-on model runs for this.** Every combination is its own Flow photo: 5 tops x 5 bottoms
-= 25 photos per model, made with Nano Banana in Google Flow (0 credits) by attaching the base outfit photo
+**No virtual try-on model runs for this.** Every combination is its own Flow photo: 7 tops x 7 bottoms
+= 49 photos per model, made with Nano Banana in Google Flow (0 credits) by attaching the base outfit photo
 and asking for the same person, pose, framing and backdrop wearing the new pieces. The garment cutouts are
 Flow packshots on magenta. `python flow/fitting.py` turns `flow/fitting/` into `public/fitting/` (outfits
 768 x 1376 WebP, cutouts 800 x 1000 transparent). It keys the beige studio wall out of every outfit photo

@@ -26,6 +26,8 @@ export const FIT_MODELS: FitModel[] = [
       { id: 'charcoal-merino-crew', name: 'Charcoal Merino Crew', price: 110 },
       { id: 'cream-cable-knit', name: 'Cream Cable Knit', price: 135 },
       { id: 'olive-bomber', name: 'Olive Bomber Jacket', price: 185 },
+      { id: 'rust-cord-overshirt', name: 'Rust Corduroy Overshirt', price: 140 },
+      { id: 'ecru-knit-polo', name: 'Ecru Knit Polo', price: 95 },
     ],
     bottoms: [
       { id: 'grey-utility-cargo', name: 'Grey Utility Cargo', price: 135 },
@@ -33,6 +35,8 @@ export const FIT_MODELS: FitModel[] = [
       { id: 'black-straight-jean', name: 'Black Straight Jean', price: 140 },
       { id: 'ecru-carpenter-pant', name: 'Ecru Carpenter Pant', price: 130 },
       { id: 'navy-chino', name: 'Navy Chino', price: 120 },
+      { id: 'brown-cord-trouser', name: 'Brown Corduroy Trouser', price: 145 },
+      { id: 'light-wash-jean', name: 'Light Wash Jean', price: 130 },
     ],
   },
   {
@@ -45,6 +49,8 @@ export const FIT_MODELS: FitModel[] = [
       { id: 'terracotta-rib-cardigan', name: 'Terracotta Rib Cardigan', price: 115 },
       { id: 'oatmeal-funnel-knit', name: 'Oatmeal Funnel Knit', price: 140 },
       { id: 'navy-breton-top', name: 'Navy Breton Top', price: 85 },
+      { id: 'sage-satin-cami', name: 'Sage Satin Camisole', price: 90 },
+      { id: 'blue-stripe-shirt', name: 'Blue Stripe Shirt', price: 105 },
     ],
     bottoms: [
       { id: 'cream-wide-trouser', name: 'Cream Wide-Leg Trouser', price: 145 },
@@ -52,6 +58,8 @@ export const FIT_MODELS: FitModel[] = [
       { id: 'indigo-wide-jean', name: 'Indigo Wide Jean', price: 150 },
       { id: 'camel-pleated-trouser', name: 'Camel Pleated Trouser', price: 155 },
       { id: 'grey-tailored-trouser', name: 'Grey Tailored Trouser', price: 160 },
+      { id: 'brown-leather-skirt', name: 'Chocolate Leather Skirt', price: 210 },
+      { id: 'white-wide-jean', name: 'White Wide Jean', price: 150 },
     ],
   },
 ];

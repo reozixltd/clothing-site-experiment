@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { nextJob, queuePick, outfitSrc, outfitKey, parseSwapStream, pieceSrc } from './headswap.ts';
@@ -21,11 +22,16 @@ test('error event and junk', () => {
   assert.equal(parseSwapStream('event: heartbeat\ndata: null\n\n'), null);
 });
 
-test('every model has 4 new tops and 4 bottoms', () => {
+// Seven a row, so the loop always has pieces off stage and never shows its whole length at once.
+test('every model has 7 new tops and 7 bottoms, each with a cutout and every outfit photo', () => {
   for (const m of FIT_MODELS) {
-    assert.equal(m.tops.length, 5);
-    assert.equal(m.bottoms.length, 5);
+    assert.equal(m.tops.length, 7);
+    assert.equal(m.bottoms.length, 7);
     for (const t of m.tops) assert.ok(!RACK.some((p) => p.id === t.id));
+    for (const p of m.tops) assert.ok(existsSync(`public${pieceSrc('tops', p.id)}`), p.id);
+    for (const p of m.bottoms) assert.ok(existsSync(`public${pieceSrc('bottoms', p.id)}`), p.id);
+    for (const t of m.tops)
+      for (const b of m.bottoms) assert.ok(existsSync(`public${outfitSrc(m.id, t.id, b.id)}`), `${m.id} ${t.id}__${b.id}`);
   }
   assert.equal(pieceSrc('tops', 'x'), '/fitting/tops/x.webp');
 });
