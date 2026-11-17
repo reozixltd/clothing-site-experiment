@@ -36,6 +36,7 @@ Needs Node 22.18 or newer (`npm test` runs the TypeScript test file directly).
 | Leave detail | "All looks" button or Escape |
 | Phone layout | Three models on stage, rail moves below, nav becomes a scrollable row |
 | Fitting Room | Scroll two sliding carousels of tops and bottoms and the model wears the centre pieces; click the model for sizes; "Try it on me" puts your own head on the model |
+| Shoes | Scroll a diagonal line of floating shoes; click the front one for a product view with sizes, thumbnails and Add to bag |
 
 ## Folder structure
 
@@ -64,18 +65,21 @@ src/
     Rack.tsx / .css      the clothes rail section
     FittingRoom.tsx / .css  the fitting room section
     TryOn.tsx            the "Try it on me" photo panel
+    Shoes.tsx / .css     the shoe line-up and its product view
   styles/
     tokens.css           colours, radius, font, timing
     base.css             reset, focus ring, reduced-motion rule
 render.html              dev-only page that renders 3D models as line-up images
 flow/                    the original Google Flow images and turntable video, sources of public/
   fitting/               fitting room originals; fitting.py turns them into public/fitting/
+  shoes/                 shoe packshots; fitting.py turns them into public/shoes/
 public/
   looks/                 cutout of each model, used in the line-up and detail view
   products/              product photos (packshots, originals in flow/products/)
   turns/<look id>/       turntable photos 0.webp ... 35.webp
   models/<folder>/       optional 3D models (model.fbx plus textures), currently unused
   fitting/               outfit photos (<model>/<top>__<bottom>.webp) and garment cutouts (tops/, bottoms/)
+  shoes/                 shoe cutouts, 1000 x 640, all standing on one ground line
 ```
 
 ## The model images
@@ -270,6 +274,19 @@ Hugging Face Space [`hugging-apps/bfs-best-face-swap`](https://huggingface.co/sp
 - **Privacy.** The visitor ticks a consent box first: their photo goes to a third-party service, which may
   keep it. This site never stores it.
 
+## Shoes (`#shoes`)
+
+The fourth section. Six shoes float on a diagonal line; the front one is named top left. Scroll over the
+line, swipe it, press the arrow keys or click a shoe further along and the line slides one step with a
+short motion blur. The wheel stops at the first and last shoe so the page can scroll on; arrows and clicks
+loop. Click the front shoe (or "View shoe") and the same line becomes a product view: that shoe large on
+the left, sizes and Add to bag on the right, thumbnails along the bottom. Escape or the X goes back.
+
+The carousel moves (wheel, swipe, keys) are shared with the fitting room in `src/lib/useCarousel.ts`.
+
+To add a shoe: one Flow packshot on magenta, side view with the toe pointing left, saved as
+`flow/shoes/<id>.jpg`; run `python flow/fitting.py`; add a row to `src/data/shoes.ts`.
+
 ## Design tokens
 
 Everything visual is set in `src/styles/tokens.css`:
@@ -289,7 +306,7 @@ Everything visual is set in `src/styles/tokens.css`:
 
 ## Not included
 
-- The other nav pages. Runway, Rail and Fitting Room are sections of the one page; the other links go nowhere.
+- The other nav pages. Runway, Rail, Fitting Room and Shoes are sections of the one page; the other links go nowhere.
 - "See availability" from the reference rail design (no stock data).
 - Search, account, cart contents and checkout. The buttons are there, the features are not.
 - A dark theme.

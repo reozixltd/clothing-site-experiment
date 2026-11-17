@@ -3,10 +3,11 @@ import { FittingRoom } from './components/FittingRoom';
 import { Header } from './components/Header';
 import { Rack } from './components/Rack';
 import { Runway } from './components/Runway';
+import { Shoes } from './components/Shoes';
 import { LOOKS } from './data/looks';
 import { RACK } from './data/rack';
 
-// One scrolling page: the runway, the rail, then the fitting room.
+// One scrolling page: the runway, the rail, the fitting room, then the shoes.
 export function App() {
   // The bag only counts items. There is no checkout in this build.
   const [bagCount, setBagCount] = useState(0);
@@ -24,6 +25,7 @@ export function App() {
         <Runway looks={LOOKS} onAddToBag={add} />
         <Rack pieces={RACK} onAddToBag={add} />
         <FittingRoom onAddToBag={add} />
+        <Shoes onAddToBag={add} />
       </main>
     </>
   );

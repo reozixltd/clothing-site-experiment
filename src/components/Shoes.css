@@ -1,0 +1,273 @@
+/*
+ * The shoe line-up (Shoes.tsx). Every shoe sits by its slot (--n, distance from the front shoe)
+ * on a diagonal; [data-open='true'] turns the same line into the product view.
+ */
+.shoes {
+  --w: clamp(240px, 36vw, 560px); /* width of the front shoe */
+  --dx: 17vw; /* one slot along the diagonal */
+  --dy: min(10vw, 15svh);
+  --ox: -20vw; /* where the open shoe sits, from the centre */
+  --oy: 0px;
+  position: relative;
+  height: calc(100svh - var(--header-h));
+  min-height: 520px;
+  overflow: hidden;
+  background: var(--surface);
+  scroll-margin-top: var(--header-h);
+}
+
+.shoes__stage {
+  position: absolute;
+  inset: 0;
+  touch-action: pan-y;
+}
+
+.shoes__stage:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -6px;
+}
+
+.shoes__line {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shoes__slot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--w);
+  margin: calc(var(--w) * -0.32) 0 0 calc(var(--w) / -2);
+  z-index: calc(10 - var(--a));
+  transform: translate(calc(var(--n) * var(--dx)), calc(var(--n) * var(--dy) * -1)) scale(calc(1 - var(--a) * 0.3));
+  opacity: clamp(0, 3 - var(--a), 1);
+  transition:
+    transform var(--slide) var(--ease),
+    opacity 420ms var(--ease),
+    filter 220ms;
+}
+
+/* Open: the front shoe grows on the left, the others wait off to the sides. */
+.shoes[data-open='true'] .shoes__slot {
+  transform: translate(calc(var(--ox) + var(--n) * 60vw), var(--oy)) scale(1.15);
+  opacity: clamp(0, 1 - var(--a), 1);
+  pointer-events: none;
+}
+
+.shoes__slot[data-wrap='true'] {
+  transition: none;
+  animation: piece-in 520ms var(--ease);
+}
+
+/* Motion blur while the line slides, as in the reference. */
+.shoes__stage[data-moving='true'] .shoes__slot {
+  filter: blur(5px);
+}
+
+.shoes__shoe {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.shoes__shoe img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1000 / 640;
+  user-select: none;
+  animation: shoe-float 4.2s ease-in-out calc(var(--i) * -0.9s) infinite alternate;
+}
+
+/* The shadow on the floor under a floating shoe. */
+.shoes__shoe::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -4%;
+  height: 9%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(21 21 23 / 0.22), transparent);
+}
+
+@keyframes shoe-float {
+  to {
+    transform: translateY(-3.5%);
+  }
+}
+
+.shoes__info {
+  position: absolute;
+  top: clamp(24px, 6vh, 56px);
+  left: var(--gutter);
+  z-index: 20;
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  width: min(300px, 100% - 2 * var(--gutter));
+  animation: shoe-info 420ms var(--ease);
+}
+
+.shoes[data-open='true'] .shoes__info {
+  top: 50%;
+  left: 60%;
+  transform: translateY(-50%);
+}
+
+@keyframes shoe-info {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+.shoes__name {
+  font-size: clamp(28px, 3.6vw, 52px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.shoes__price {
+  font-size: 15px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.shoes__view {
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid var(--ink);
+  border-radius: var(--pill);
+  font-size: 13px;
+  transition:
+    background-color var(--quick),
+    color var(--quick);
+}
+
+.shoes__view:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.shoes__hint {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.shoes__nav {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 20px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.shoes__nav button,
+.shoes__close {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+  color: var(--ink);
+  transition: border-color var(--quick);
+}
+
+.shoes__nav button:hover,
+.shoes__close:hover {
+  border-color: var(--ink);
+}
+
+.shoes__close {
+  position: absolute;
+  top: 20px;
+  right: var(--gutter);
+  z-index: 20;
+}
+
+.shoes__thumbs {
+  position: absolute;
+  left: var(--gutter);
+  bottom: 20px;
+  z-index: 20;
+  display: flex;
+  gap: 6px;
+}
+
+.shoes__thumbs button {
+  width: 56px;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: border-color var(--quick);
+}
+
+.shoes__thumbs button:hover {
+  border-color: var(--line);
+}
+
+.shoes__thumbs button[aria-pressed='true'] {
+  border-color: var(--ink);
+}
+
+.shoes__thumbs img {
+  display: block;
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shoes__slot,
+  .shoes__slot[data-wrap='true'],
+  .shoes__info {
+    transition: opacity var(--quick);
+    animation: none;
+  }
+
+  .shoes__stage[data-moving='true'] .shoes__slot {
+    filter: none;
+  }
+
+  .shoes__shoe img {
+    animation: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .shoes {
+    --w: 68vw;
+    --dx: 24vw;
+    --dy: 15vw;
+    --ox: 0px;
+    --oy: -24svh;
+  }
+
+  .shoes[data-open='true'] .shoes__slot {
+    transform: translate(calc(var(--ox) + var(--n) * 100vw), var(--oy)) scale(1.1);
+  }
+
+  .shoes[data-open='true'] .shoes__info {
+    top: 44%;
+    left: var(--gutter);
+    transform: none;
+  }
+
+  .shoes__thumbs button {
+    width: 40px;
+  }
+
+  /* The thumbnails take the whole bottom edge; swipe or tap one. */
+  .shoes[data-open='true'] .shoes__nav {
+    display: none;
+  }
+}

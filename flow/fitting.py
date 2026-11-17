@@ -2,7 +2,7 @@
 
 Outfit photos flow/fitting/<model>/<top>__<bottom>.jpg -> public/fitting/<model>/...webp (768 x 1376,
 backdrop kept). Packshots flow/fitting/tops|bottoms/<id>.jpg (magenta backdrop) -> transparent
-800 x 1000 cutouts in public/fitting/tops|bottoms/. Prints each model's backdrop colour for fitting.ts.
+800 x 1000 cutouts in public/fitting/tops|bottoms/. Shoe packshots flow/shoes/<id>.jpg -> public/shoes/. Prints each model's backdrop colour for fitting.ts.
 """
 import glob
 import os
@@ -26,7 +26,7 @@ def fit(im, w, h):
     return im.crop((l, t, l + cw, t + ch)).resize((w, h), Image.LANCZOS)
 
 
-def packshot(src, dst):
+def packshot(src, dst, W=W, H=H, floor=False):
     im = cutout(src)
     im.putalpha(im.getchannel('A').filter(ImageFilter.MinFilter(3)))
     # Drop the pink fringe: on soft edge pixels, magenta shows as red and blue above green.
@@ -42,8 +42,16 @@ def packshot(src, dst):
     s = min(W * 0.92 / part.width, H * 0.92 / part.height)
     part = part.resize((round(part.width * s), round(part.height * s)), Image.LANCZOS)
     out = Image.new('RGBA', (W, H))
-    out.paste(part, ((W - part.width) // 2, (H - part.height) // 2))
+    # floor: stand the piece on a line near the bottom (shoes share one ground line).
+    out.paste(part, ((W - part.width) // 2, H - part.height - H // 20 if floor else (H - part.height) // 2))
     out.save(dst, quality=86, method=6)
+
+
+def shoes():
+    """flow/shoes/<id>.jpg (magenta backdrop, toe left) -> transparent 1000 x 640 public/shoes/<id>.webp."""
+    os.makedirs('public/shoes', exist_ok=True)
+    for src in sorted(glob.glob('flow/shoes/*.jpg')):
+        packshot(src, f'public/shoes/{os.path.basename(src)[:-4]}.webp', 1000, 640, floor=True)
 
 
 def main():
@@ -57,6 +65,7 @@ def main():
         else:
             fit(Image.open(src).convert('RGB'), OW, OH).save(dst, quality=86, method=6)
         n += 1
+    shoes()
     print(f'{n} images')
     for model, base in BASES.items():
         a = np.asarray(Image.open(f'flow/fitting/{model}/{base}.jpg').convert('RGB'))

@@ -1,10 +1,10 @@
 import { X } from '@phosphor-icons/react';
-import { type CSSProperties, type KeyboardEvent as ReactKey, type PointerEvent, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { BOTTOM_SIZES, FIT_MODELS, TOP_SIZES } from '../data/fitting';
 import { formatPrice } from '../data/looks';
 import type { Piece } from '../data/rack';
 import { type Job, outfitKey, queuePick, outfitSrc, pieceSrc } from '../lib/headswap';
-import { type Direction, didWrap, mod, slotOf } from '../lib/carousel';
+import { useCarousel } from '../lib/useCarousel';
 import { headSwap } from '../lib/swapClient';
 import { TryOn } from './TryOn';
 import './FittingRoom.css';
@@ -313,70 +313,8 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
  * side piece brings it to the centre.
  */
 function Row({ kind, pieces, worn, onWear }: { kind: Kind; pieces: Piece[]; worn: string; onWear: (id: string) => void }) {
-  const n = pieces.length;
   const active = Math.max(0, pieces.findIndex((p) => p.id === worn));
-  const [dir, setDir] = useState<Direction>(1);
-  const prev = useRef<number[]>([]);
-  const [moving, setMoving] = useState(false);
-  const lock = useRef(0);
-  const wheel = useRef(0);
-  const drag = useRef<{ x: number; id: number } | null>(null);
-
-  const slots = pieces.map((_, i) => slotOf(i, active, dir, n));
-  const wrapped = slots.map((sl, i) => prev.current[i] !== undefined && didWrap(prev.current[i], sl, dir));
-  useEffect(() => {
-    prev.current = slots;
-  });
-
-  const step = (by: number) => {
-    if (!by) return;
-    setDir(by > 0 ? 1 : -1);
-    setMoving(true);
-    clearTimeout(lock.current);
-    lock.current = window.setTimeout(() => setMoving(false), 450);
-    onWear(pieces[mod(active + by, n)].id);
-  };
-
-  // One piece per wheel gesture tick; horizontal trackpad swipes and vertical wheels both work.
-  const onWheel = (e: WheelEvent) => {
-    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    if (!d) return;
-    e.preventDefault();
-    if (moving) return;
-    wheel.current += d;
-    if (Math.abs(wheel.current) < 30) return;
-    step(wheel.current > 0 ? 1 : -1);
-    wheel.current = 0;
-  };
-
-  // React's onWheel is passive, so preventDefault there can't stop the page scrolling.
-  const el = useRef<HTMLUListElement>(null);
-  const wheelFn = useRef(onWheel);
-  wheelFn.current = onWheel;
-  useEffect(() => {
-    const h = (e: WheelEvent) => wheelFn.current(e);
-    el.current!.addEventListener('wheel', h, { passive: false });
-    return () => el.current?.removeEventListener('wheel', h);
-  }, []);
-
-  const onKey = (e: ReactKey) => {
-    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-    e.preventDefault();
-    e.stopPropagation(); // the runway listens for arrows on window
-    step(e.key === 'ArrowRight' ? 1 : -1);
-  };
-
-  const onDown = (e: PointerEvent) => {
-    if (e.pointerType === 'mouse') return; // mice use the wheel and clicks
-    drag.current = { x: e.clientX, id: e.pointerId };
-  };
-  const onUp = (e: PointerEvent) => {
-    const d = drag.current;
-    drag.current = null;
-    if (!d || d.id !== e.pointerId) return;
-    const dx = e.clientX - d.x;
-    if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
-  };
+  const { slots, wrapped, moving, step, bind } = useCarousel<HTMLUListElement>(pieces.length, active, (i) => onWear(pieces[i].id));
 
   return (
     <ul
@@ -384,11 +322,7 @@ function Row({ kind, pieces, worn, onWear }: { kind: Kind; pieces: Piece[]; worn
       aria-label={`${kind === 'tops' ? 'Tops' : 'Bottoms'}: scroll or use the arrow keys`}
       tabIndex={0}
       data-moving={moving}
-      ref={el}
-      onKeyDown={onKey}
-      onPointerDown={onDown}
-      onPointerUp={onUp}
-      onPointerCancel={() => (drag.current = null)}
+      {...bind}
     >
       {pieces.map((p, i) => {
         const sl = slots[i];
