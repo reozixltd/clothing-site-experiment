@@ -104,6 +104,12 @@
   animation: shoe-info 420ms var(--ease);
 }
 
+.bags__name,
+.bags__note,
+.bags__price {
+  margin: 0;
+}
+
 .bags__name {
   font-size: clamp(26px, 3vw, 44px);
   font-weight: 700;

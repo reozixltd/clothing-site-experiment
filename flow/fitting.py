@@ -59,6 +59,20 @@ def shoes():
         packshot(src, f'public/shoes/{os.path.basename(src)[:-4]}.webp', 1000, 640, floor=True)
 
 
+def despill(im, band=25):
+    """Magenta spill on opaque pixels near the edge (hair, arms): pull red and blue back to green."""
+    a = np.asarray(im).astype(np.int16)
+    near = np.asarray(im.getchannel('A').filter(ImageFilter.MinFilter(band))) < 250
+    # Skin and hair have blue below green; any edge pixel with blue above green is backdrop.
+    pink = near & (a[..., 2] > a[..., 1] + 15)
+    # Strong magenta anywhere (backdrop caught between arm and body).
+    pink |= (a[..., 2] > a[..., 1] + 20) & (a[..., 0] > a[..., 1] + 20)
+    g = a[..., 1]
+    a[..., 2] = np.where(pink, g, a[..., 2])
+    a[..., 0] = np.where(pink, g + (a[..., 0] - g) * 0.4, a[..., 0])
+    return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), 'RGBA')
+
+
 def bags():
     """flow/bags/<id>.jpg -> 800 x 800 cutouts in public/bags/; flow/bags/model/<id>.jpg (the model
     holding that bag, magenta backdrop) -> full-frame cutouts in public/bags/model/, so every photo lines up."""
@@ -66,7 +80,7 @@ def bags():
     for src in sorted(glob.glob('flow/bags/*.jpg')):
         packshot(src, f'public/bags/{os.path.basename(src)[:-4]}.webp', 800, 800)
     for src in sorted(glob.glob('flow/bags/model/*.jpg')):
-        keyed(src).save(f'public/bags/model/{os.path.basename(src)[:-4]}.webp', quality=86, method=6)
+        despill(keyed(src)).save(f'public/bags/model/{os.path.basename(src)[:-4]}.webp', quality=86, method=6)
 
 
 def main():

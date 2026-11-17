@@ -54,7 +54,7 @@ export function Figure({ look, slot, enterFrom, showPins, activeProduct, onActiv
         {slot === 0 && (look.turn || look.model) && (
           <span className="figure__360" aria-hidden>
             <ArrowsClockwise weight="bold" />
-            360°
+            {showPins ? 'Drag to turn' : '360°'}
           </span>
         )}
       </button>

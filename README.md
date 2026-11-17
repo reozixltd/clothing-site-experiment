@@ -30,7 +30,7 @@ Needs Node 22.18 or newer (`npm test` runs the TypeScript test file directly).
 | Detail view | Click the centre model. The others fade out and three pins appear |
 | Turn the model | The City Edit: drag the model in the detail view (or press Left / Right) to turn the real person all the way round. The pins follow and fade when their garment faces away |
 | 3D model (optional) | Off by default. A look with `model` set opens a game-style 3D model instead |
-| 360° badge | The centre model shows a small spinning "360°" pill when its look can be turned |
+| 360° badge | The centre model shows a small spinning "360°" pill when its look can be turned; in the detail view it reads "Drag to turn" |
 | Pins | Hover, focus or tap a pin to see the piece and its price. It also highlights the row in the rail |
 | Product rail | Lists the three pieces of the centre look, the total, and "Add all to bag" |
 | Bag counter | The header bag icon counts added items (there is no checkout) |
