@@ -2,8 +2,9 @@
  * The fitting room. The section is the colour of the photo's studio wall, and the
  * photo's edges fade out, so the model stands in the page rather than in a box.
  * Desktop: the model in the middle, a row of tops across the torso and a row of bottoms across
- * the legs. Each row is a looping carousel: pieces sit by slot (--n, -2..2, --s its sign) and
- * slide when it changes; slot 0 shrinks into the model (it's what the model is wearing).
+ * the legs. Each row is a looping carousel: pieces sit by slot (--n, --s its sign) and slide when it
+ * changes; slot 0 shrinks into the model (it's what the model is wearing). Two show each side; the rest
+ * wait off stage, hidden, so the loop never shows its end.
  */
 .fit {
   --tile: clamp(84px, 8.5vw, 148px);
@@ -121,6 +122,11 @@
     transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
     opacity 280ms var(--ease),
     filter 280ms var(--ease);
+}
+
+/* The pieces waiting off stage (aria-hidden past slot 2) can't be clicked through empty space. */
+.fit__slot[aria-hidden='true'] {
+  pointer-events: none;
 }
 
 .fit__slot[data-slot='0'] {

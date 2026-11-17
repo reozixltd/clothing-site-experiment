@@ -53,6 +53,16 @@ def regrey(im):
     w, h = W_ // 2, H_ // 2
     fig = Image.fromarray(((d > 9) * 255).astype(np.uint8)).resize((w, h), Image.BILINEAR).point(lambda v: 255 if v > 127 else 0)
     fig = fig.filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5)).filter(ImageFilter.MedianFilter(3))
+    dh = np.asarray(Image.fromarray(d.astype(np.float32)).resize((w, h)))
+    # Low down, the wall's shadows read as figure pixel by pixel. Below the hips, key on the local mean
+    # instead, then open the mask: solid legs survive, thin ragged shadow scraps beside them don't. Holes
+    # this leaves inside pale cloth are enclosed, so the border fill below puts them back.
+    hip = int(h * 0.5)
+    mean = np.asarray(Image.fromarray(np.clip(dh, 0, 255).astype(np.uint8)).filter(ImageFilter.BoxBlur(6)))
+    f = np.asarray(fig) > 0
+    low = Image.fromarray(((f & (mean > 12))[hip:] * 255).astype(np.uint8))
+    f[hip:] = np.asarray(low.filter(ImageFilter.MinFilter(9)).filter(ImageFilter.MaxFilter(9))) > 0
+    fig = Image.fromarray((f * 255).astype(np.uint8))
     # (fromarray images ignore floodfill until copied.)
     m = Image.fromarray(np.where(np.asarray(fig) > 0, 0, 255).astype(np.uint8)).copy()
     for x in range(0, w, 3):
@@ -65,7 +75,6 @@ def regrey(im):
                 ImageDraw.floodfill(m, (x, y), 128)
     lab = np.asarray(m).copy()
     keep = lab != 128
-    dh = np.asarray(Image.fromarray(d.astype(np.float32)).resize((w, h)))
     # Enclosed holes big enough to hold a 15px square: wall if they look like wall.
     seeds = np.asarray(Image.fromarray(((lab == 255) * 255).astype(np.uint8)).filter(ImageFilter.MinFilter(15))) > 0
     holes = Image.fromarray(lab).copy()
@@ -82,9 +91,12 @@ def regrey(im):
     cols = np.nonzero(keep[knee])[0]
     keep[knee:, : cols.min() - w // 30] = False
     keep[knee:, cols.max() + w // 30:] = False
-    # Only the figure holding the torso.
+    # Only the figure: what joins the middle at chest or leg height (a tucked hem can split the two).
     km = Image.fromarray((keep * 255).astype(np.uint8)).copy()
-    ImageDraw.floodfill(km, (w // 2, int(h * 0.4)), 200)
+    for y in (int(h * 0.4), int(h * 0.7)):
+        for x in range(int(w * 0.4), int(w * 0.6), 4):
+            if km.getpixel((x, y)) == 255:
+                ImageDraw.floodfill(km, (x, y), 200)
     alpha = Image.fromarray(((np.asarray(km) == 200) * 255).astype(np.uint8)).resize((W_, H_), Image.BILINEAR)
     al = np.asarray(alpha.filter(ImageFilter.MinFilter(5)).filter(ImageFilter.GaussianBlur(1.2))).astype(np.float32) / 255
     fade = np.clip((seam - 10 - np.arange(H_)) / 90, 0, 1)[:, None]
