@@ -1,7 +1,7 @@
 """Fitting room images: python flow/fitting.py
 
 Outfit photos flow/fitting/<model>/<top>__<bottom>.jpg -> public/fitting/<model>/...webp (768 x 1376,
-studio wall turned flat light grey, GREY). Packshots flow/fitting/tops|bottoms/<id>.jpg (magenta backdrop) -> transparent
+studio wall and floor turned flat light grey, GREY, by rembg). Packshots flow/fitting/tops|bottoms/<id>.jpg (magenta backdrop) -> transparent
 800 x 1000 cutouts in public/fitting/tops|bottoms/. Shoe packshots flow/shoes/<id>.jpg -> public/shoes/. Bags flow/bags/ -> public/bags/.
 """
 import glob
@@ -28,81 +28,27 @@ def fit(im, w, h):
 GREY = (236, 236, 234)  # the fitting room's backdrop in fitting.ts
 
 
+_session = None
+
+
 def regrey(im):
-    """The studio wall and floor replaced by flat GREY. A smooth surface is fitted to the wall either side
-    of the model and keyed on the distance from it; the figure is what the wall can't reach from the
-    border, with enclosed gaps that look like wall (between arm and body) reopened. The floor's colour
-    overlaps cream cloth too much to key, so the legs fade out just above the wall/floor seam instead.
-    ponytail: hand-rolled key; a matting model (rembg) would keep the feet."""
-    a = np.asarray(im).astype(np.float32)
-    H_, W_, _ = a.shape
-    ys, xs = np.mgrid[0:H_, 0:W_]
-    strip = np.concatenate([a[:, : int(W_ * 0.12)], a[:, int(W_ * 0.88):]], 1).mean((1, 2))
-    lo = int(H_ * 0.55)
-    seam = lo + int(np.argmax(np.abs(np.diff(np.convolve(strip[lo:], np.ones(9) / 9, 'same')))[8:-8])) + 8
-
-    def feats(y, x):
-        y, x = y / H_, x / W_
-        return np.stack([np.ones_like(x), x, y, x * x, y * y, x * y, y ** 3, x * x * y], -1)
-
-    side = ((xs < W_ * 0.16) | (xs > W_ * 0.84)) & (ys < seam - 6)
-    F = feats(ys[side], xs[side])
-    bg = np.stack([feats(ys, xs) @ np.linalg.lstsq(F, a[side][:, c], rcond=None)[0] for c in range(3)], -1)
-    d = np.sqrt(((a - bg) ** 2).sum(-1))
-    # The mask at half size; a closing fills the speckle.
-    w, h = W_ // 2, H_ // 2
-    fig = Image.fromarray(((d > 9) * 255).astype(np.uint8)).resize((w, h), Image.BILINEAR).point(lambda v: 255 if v > 127 else 0)
-    fig = fig.filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5)).filter(ImageFilter.MedianFilter(3))
-    dh = np.asarray(Image.fromarray(d.astype(np.float32)).resize((w, h)))
-    # Low down, the wall's shadows read as figure pixel by pixel. Below the hips, key on the local mean
-    # instead, then open the mask: solid legs survive, thin ragged shadow scraps beside them don't. Holes
-    # this leaves inside pale cloth are enclosed, so the border fill below puts them back.
-    hip = int(h * 0.5)
-    mean = np.asarray(Image.fromarray(np.clip(dh, 0, 255).astype(np.uint8)).filter(ImageFilter.BoxBlur(6)))
-    f = np.asarray(fig) > 0
-    low = Image.fromarray(((f & (mean > 12))[hip:] * 255).astype(np.uint8))
-    f[hip:] = np.asarray(low.filter(ImageFilter.MinFilter(9)).filter(ImageFilter.MaxFilter(9))) > 0
-    fig = Image.fromarray((f * 255).astype(np.uint8))
-    # (fromarray images ignore floodfill until copied.)
-    m = Image.fromarray(np.where(np.asarray(fig) > 0, 0, 255).astype(np.uint8)).copy()
-    for x in range(0, w, 3):
-        for y in (0, h - 1):
-            if m.getpixel((x, y)) == 255:
-                ImageDraw.floodfill(m, (x, y), 128)
-    for y in range(0, h, 3):
-        for x in (0, w - 1):
-            if m.getpixel((x, y)) == 255:
-                ImageDraw.floodfill(m, (x, y), 128)
-    lab = np.asarray(m).copy()
-    keep = lab != 128
-    # Enclosed holes big enough to hold a 15px square: wall if they look like wall.
-    seeds = np.asarray(Image.fromarray(((lab == 255) * 255).astype(np.uint8)).filter(ImageFilter.MinFilter(15))) > 0
-    holes = Image.fromarray(lab).copy()
-    for y_, x_ in zip(*np.nonzero(seeds)):
-        if holes.getpixel((int(x_), int(y_))) != 255:
-            continue
-        ImageDraw.floodfill(holes, (int(x_), int(y_)), 64)
-        comp = np.asarray(holes) == 64
-        if np.median(dh[comp]) < 5:
-            keep[comp] = False
-        holes.paste(32, mask=Image.fromarray((comp * 255).astype(np.uint8)))
-    # Shadows at the foot of the wall touch the legs: low down, keep only the legs' own width.
-    knee = int(h * 0.62)
-    cols = np.nonzero(keep[knee])[0]
-    keep[knee:, : cols.min() - w // 30] = False
-    keep[knee:, cols.max() + w // 30:] = False
-    # Only the figure: what joins the middle at chest or leg height (a tucked hem can split the two).
-    km = Image.fromarray((keep * 255).astype(np.uint8)).copy()
-    for y in (int(h * 0.4), int(h * 0.7)):
-        for x in range(int(w * 0.4), int(w * 0.6), 4):
-            if km.getpixel((x, y)) == 255:
-                ImageDraw.floodfill(km, (x, y), 200)
-    alpha = Image.fromarray(((np.asarray(km) == 200) * 255).astype(np.uint8)).resize((W_, H_), Image.BILINEAR)
-    al = np.asarray(alpha.filter(ImageFilter.MinFilter(5)).filter(ImageFilter.GaussianBlur(1.2))).astype(np.float32) / 255
-    fade = np.clip((seam - 10 - np.arange(H_)) / 90, 0, 1)[:, None]
-    al = (al * fade)[..., None]
-    return Image.fromarray((al * a + (1 - al) * np.array(GREY, np.float32)).round().astype(np.uint8))
-
+    """The studio wall and floor replaced by flat GREY: rembg (isnet-general-use, ~10 s an image on CPU)
+    mattes the model, feet and all, and a faint soft shadow under the shoes keeps them on the ground."""
+    global _session
+    from rembg import new_session, remove
+    _session = _session or new_session('isnet-general-use')
+    al = np.asarray(remove(im, session=_session, only_mask=True), np.float32) / 255
+    # The shadow: the bottom 3% of the figure, squashed flat and blurred, just under the feet.
+    rows = np.nonzero(al.max(1) > 0.5)[0]
+    foot = rows.max()
+    band = (al[foot - int(len(rows) * 0.03): foot + 1] > 0.5).any(0)
+    xs = np.nonzero(band)[0]
+    sh = Image.new('L', im.size, 0)
+    ImageDraw.Draw(sh).ellipse((xs.min() - 12, foot - 8, xs.max() + 12, foot + 8), fill=90)
+    sh = np.asarray(sh.filter(ImageFilter.GaussianBlur(10)), np.float32)[..., None] / 255
+    bg = np.array(GREY, np.float32) * (1 - 0.35 * sh)
+    a = al[..., None]
+    return Image.fromarray((a * np.asarray(im, np.float32) + (1 - a) * bg).round().astype(np.uint8))
 
 def keyed(src):
     """The magenta backdrop cut away, edges cleaned."""

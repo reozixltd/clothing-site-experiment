@@ -255,10 +255,9 @@ sizes and Add to bag. Escape or the X closes it.
 = 49 photos per model, made with Nano Banana in Google Flow (0 credits) by attaching the base outfit photo
 and asking for the same person, pose, framing and backdrop wearing the new pieces. The garment cutouts are
 Flow packshots on magenta. `python flow/fitting.py` turns `flow/fitting/` into `public/fitting/` (outfits
-768 x 1376 WebP, cutouts 800 x 1000 transparent). It keys the beige studio wall out of every outfit photo
-(`regrey`: a smooth surface fitted to the wall beside the model) and fills it with that grey. The floor is
-too close to cream cloth to key, so the legs fade out just above the wall/floor line; desktop crops there
-anyway. A matting model such as `rembg` would keep the feet.
+768 x 1376 WebP, cutouts 800 x 1000 transparent). It cuts the model out of the beige studio
+wall and floor with `rembg` (isnet-general-use, `pip install rembg`, about 10 s a photo on CPU, free) and
+puts them on that grey, feet and all, with a faint shadow under the shoes.
 
 To add a garment: one packshot, plus one outfit photo for every piece it can be worn with (a new top for
 one model = 5 photos), named `<top>__<bottom>.jpg`. Check the head lines up with the base photo, or the
