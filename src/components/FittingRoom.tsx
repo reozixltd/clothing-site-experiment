@@ -1,9 +1,10 @@
 import { X } from '@phosphor-icons/react';
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, type KeyboardEvent as ReactKey, type PointerEvent, useEffect, useRef, useState } from 'react';
 import { BOTTOM_SIZES, FIT_MODELS, TOP_SIZES } from '../data/fitting';
 import { formatPrice } from '../data/looks';
 import type { Piece } from '../data/rack';
 import { type Job, outfitKey, queuePick, outfitSrc, pieceSrc } from '../lib/headswap';
+import { type Direction, didWrap, mod, slotOf } from '../lib/carousel';
 import { headSwap } from '../lib/swapClient';
 import { TryOn } from './TryOn';
 import './FittingRoom.css';
@@ -12,9 +13,10 @@ type Kind = 'tops' | 'bottoms';
 type Wear = { top: string; bottom: string };
 
 /**
- * The fitting room: one model centre stage, tops on the upper row and bottoms on the lower,
- * two each side. Click a piece and the model is wearing it (a cross-fade to that outfit's
- * Flow photo); click the worn piece again for sizes and Add to bag.
+ * The fitting room: one model centre stage, a looping carousel of tops across the torso and one
+ * of bottoms across the legs. Scroll, drag or click a row and it slides one piece along; the piece
+ * that slides into the centre is what the model is wearing (a cross-fade to that outfit's Flow
+ * photo). Click the model (or the caption) for sizes and Add to bag.
  */
 export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => void }) {
   const [modelId, setModelId] = useState<'him' | 'her'>('him');
@@ -44,7 +46,16 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
   // Only while the visitor is looking at themselves (no hidden uploads under "On the model").
   // Switching back to "On me" also retries an outfit that failed.
   const want = () => setJob((j) => queuePick(j, key, new Set(swappedRef.current.keys()), face !== null && onMe));
-  useEffect(want, [key, face, onMe]);
+  // Wait until the rows stop: scrolling past outfits must not start (and use up) swaps.
+  useEffect(() => {
+    const t = setTimeout(want, 500);
+    return () => clearTimeout(t);
+  }, [key, face, onMe]);
+
+  // Every outfit photo of this model, warmed up so scrolling through the rows stays smooth.
+  useEffect(() => {
+    for (const t of model.tops) for (const b of model.bottoms) new Image().src = outfitSrc(modelId, t.id, b.id);
+  }, [modelId]);
 
   useEffect(() => {
     const k = job.running;
@@ -139,33 +150,8 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
     return () => window.removeEventListener('keydown', onKey, true);
   });
 
-  const pick = (kind: Kind, piece: Piece) => {
-    const worn = kind === 'tops' ? top : bottom;
-    if (piece.id === worn) return show(kind, piece);
-    setWear((w) => ({ ...w, [modelId]: { ...w[modelId], [kind === 'tops' ? 'top' : 'bottom']: piece.id } }));
-  };
-
-  const row = (kind: Kind) => (
-    <ul className={`fit__row fit__row--${kind}`} aria-label={kind === 'tops' ? 'Tops' : 'Bottoms'}>
-      {model[kind].map((p) => {
-        const worn = p.id === (kind === 'tops' ? top : bottom);
-        return (
-          <li key={p.id}>
-            <button
-              type="button"
-              className="fit__piece"
-              aria-pressed={worn}
-              aria-label={`${p.name}, ${formatPrice(p.price)}`}
-              title={worn ? 'Sizes and Add to bag' : undefined}
-              onClick={() => pick(kind, p)}
-            >
-              <img src={pieceSrc(kind, p.id)} alt="" draggable={false} />
-            </button>
-          </li>
-        );
-      })}
-    </ul>
-  );
+  const wearPiece = (kind: Kind, id: string) =>
+    setWear((w) => ({ ...w, [modelId]: { ...w[modelId], [kind === 'tops' ? 'top' : 'bottom']: id } }));
 
   const sizes = open?.kind === 'tops' ? TOP_SIZES : BOTTOM_SIZES;
 
@@ -223,8 +209,19 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
               />
             ))}
           </div>
-          {row('tops')}
-          {row('bottoms')}
+          <button
+            className="fit__stagehit"
+            type="button"
+            tabIndex={-1}
+            aria-hidden
+            onClick={(e) => {
+              const r = e.currentTarget.getBoundingClientRect();
+              if ((e.clientY - r.top) / r.height < 0.45) show('tops', topPiece);
+              else show('bottoms', bottomPiece);
+            }}
+          />
+          <Row kind="tops" pieces={model.tops} worn={top} onWear={(id) => wearPiece('tops', id)} />
+          <Row kind="bottoms" pieces={model.bottoms} worn={bottom} onWear={(id) => wearPiece('bottoms', id)} />
         </div>
 
         <p className="fit__caption">
@@ -307,5 +304,116 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (items: number) => voi
         </div>
       )}
     </section>
+  );
+}
+
+/**
+ * One looping row. Pieces sit by slot (-2..2, `slotOf` from the runway); slot 0 is the worn piece,
+ * hidden "inside" the model. A wheel tick, a drag or an arrow key moves one piece; a click on a
+ * side piece brings it to the centre.
+ */
+function Row({ kind, pieces, worn, onWear }: { kind: Kind; pieces: Piece[]; worn: string; onWear: (id: string) => void }) {
+  const n = pieces.length;
+  const active = Math.max(0, pieces.findIndex((p) => p.id === worn));
+  const [dir, setDir] = useState<Direction>(1);
+  const prev = useRef<number[]>([]);
+  const [moving, setMoving] = useState(false);
+  const lock = useRef(0);
+  const wheel = useRef(0);
+  const drag = useRef<{ x: number; id: number } | null>(null);
+
+  const slots = pieces.map((_, i) => slotOf(i, active, dir, n));
+  const wrapped = slots.map((sl, i) => prev.current[i] !== undefined && didWrap(prev.current[i], sl, dir));
+  useEffect(() => {
+    prev.current = slots;
+  });
+
+  const step = (by: number) => {
+    if (!by) return;
+    setDir(by > 0 ? 1 : -1);
+    setMoving(true);
+    clearTimeout(lock.current);
+    lock.current = window.setTimeout(() => setMoving(false), 450);
+    onWear(pieces[mod(active + by, n)].id);
+  };
+
+  // One piece per wheel gesture tick; horizontal trackpad swipes and vertical wheels both work.
+  const onWheel = (e: WheelEvent) => {
+    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (!d) return;
+    e.preventDefault();
+    if (moving) return;
+    wheel.current += d;
+    if (Math.abs(wheel.current) < 30) return;
+    step(wheel.current > 0 ? 1 : -1);
+    wheel.current = 0;
+  };
+
+  // React's onWheel is passive, so preventDefault there can't stop the page scrolling.
+  const el = useRef<HTMLUListElement>(null);
+  const wheelFn = useRef(onWheel);
+  wheelFn.current = onWheel;
+  useEffect(() => {
+    const h = (e: WheelEvent) => wheelFn.current(e);
+    el.current!.addEventListener('wheel', h, { passive: false });
+    return () => el.current?.removeEventListener('wheel', h);
+  }, []);
+
+  const onKey = (e: ReactKey) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    e.stopPropagation(); // the runway listens for arrows on window
+    step(e.key === 'ArrowRight' ? 1 : -1);
+  };
+
+  const onDown = (e: PointerEvent) => {
+    if (e.pointerType === 'mouse') return; // mice use the wheel and clicks
+    drag.current = { x: e.clientX, id: e.pointerId };
+  };
+  const onUp = (e: PointerEvent) => {
+    const d = drag.current;
+    drag.current = null;
+    if (!d || d.id !== e.pointerId) return;
+    const dx = e.clientX - d.x;
+    if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
+  };
+
+  return (
+    <ul
+      className={`fit__row fit__row--${kind}`}
+      aria-label={`${kind === 'tops' ? 'Tops' : 'Bottoms'}: scroll or use the arrow keys`}
+      tabIndex={0}
+      data-moving={moving}
+      ref={el}
+      onKeyDown={onKey}
+      onPointerDown={onDown}
+      onPointerUp={onUp}
+      onPointerCancel={() => (drag.current = null)}
+    >
+      {pieces.map((p, i) => {
+        const sl = slots[i];
+        return (
+          <li
+            key={p.id}
+            className="fit__slot"
+            data-slot={sl}
+            data-wrap={wrapped[i]}
+            style={{ '--n': sl, '--s': Math.sign(sl) } as CSSProperties}
+            aria-hidden={Math.abs(sl) > 2}
+          >
+            <button
+              type="button"
+              className="fit__piece"
+              tabIndex={-1}
+              aria-pressed={sl === 0}
+              aria-label={`${p.name}, ${formatPrice(p.price)}`}
+              onClick={() => step(sl)}
+            >
+              <img src={pieceSrc(kind, p.id)} alt="" draggable={false} />
+            </button>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

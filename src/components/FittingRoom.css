@@ -1,8 +1,9 @@
 /*
  * The fitting room. The section is the colour of the photo's studio wall, and the
  * photo's edges fade out, so the model stands in the page rather than in a box.
- * Desktop: five columns, two tops + two bottoms each side of the model.
- * The two piece lists are display: contents, so their items sit on that grid.
+ * Desktop: the model in the middle, a row of tops across the torso and a row of bottoms across
+ * the legs. Each row is a looping carousel: pieces sit by slot (--n, -2..2, --s its sign) and
+ * slide when it changes; slot 0 shrinks into the model (it's what the model is wearing).
  */
 .fit {
   --tile: clamp(84px, 8.5vw, 148px);
@@ -66,34 +67,76 @@
 }
 
 .fit__floor {
-  display: grid;
-  /* Model column = the photo's width (floor height x 768/1376) plus a little air; the pieces hug it. */
-  grid-template-columns: 1fr repeat(2, var(--tile)) calc((100cqh - 120px) * 0.558 + 40px) repeat(2, var(--tile)) 1fr;
-  grid-template-rows: 1fr 1fr;
-  column-gap: clamp(10px, 1.6vw, 24px);
-  row-gap: 18px;
+  /* The photo's width: floor height x 768/1376. The pieces hug it. */
+  --model-w: calc((100cqh - 120px) * 0.558);
+  --gap: clamp(12px, 1.8vw, 28px);
+  position: relative;
   min-height: 0;
 }
 
 .fit__row {
-  display: contents;
-}
-
-.fit__row li {
-  grid-row: 1;
-  align-self: end;
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(var(--tile) * 1.25);
+  margin: 0;
+  padding: 0;
   list-style: none;
+  touch-action: pan-y;
+  border-radius: var(--radius);
 }
 
-.fit__row--bottoms li {
-  grid-row: 2;
-  align-self: start;
+.fit__row:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
 }
 
-.fit__row li:nth-child(1) { grid-column: 2; }
-.fit__row li:nth-child(2) { grid-column: 3; }
-.fit__row li:nth-child(3) { grid-column: 5; }
-.fit__row li:nth-child(4) { grid-column: 6; }
+/* Across the torso and across the legs. */
+.fit__row--tops {
+  top: calc(31% - var(--tile) * 0.625);
+}
+
+.fit__row--bottoms {
+  top: calc(67% - var(--tile) * 0.625);
+}
+
+.fit__slot {
+  position: absolute;
+  top: 0;
+  left: calc(50% - var(--tile) / 2);
+  width: var(--tile);
+  transform: translateX(
+    calc(var(--n) * (var(--tile) + var(--gap)) + var(--s) * (var(--model-w) / 2 - var(--tile) / 2 + var(--gap)))
+  );
+  transition:
+    transform 560ms var(--ease),
+    opacity 420ms var(--ease),
+    filter 220ms;
+}
+
+/* The worn piece slides into the model and disappears into the photo. */
+.fit__slot[data-slot='0'] {
+  opacity: 0;
+  transform: scale(0.55);
+  pointer-events: none;
+}
+
+/* The piece that went round the back of the loop fades in at the far end instead of crossing. */
+.fit__slot[data-wrap='true'] {
+  transition: none;
+  animation: piece-in 520ms var(--ease);
+}
+
+@keyframes piece-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* A soft motion blur while a row slides, as in the reference. */
+.fit__row[data-moving='true'] .fit__slot {
+  filter: blur(2.5px);
+}
 
 .fit__piece {
   display: block;
@@ -132,10 +175,22 @@
 }
 
 .fit__stage {
-  position: relative;
-  grid-column: 4;
-  grid-row: 1 / 3;
-  min-height: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - var(--model-w) / 2 - 20px);
+  width: calc(var(--model-w) + 40px);
+}
+
+/* Click the model: upper part opens the top, lower part the bottom. */
+.fit__stagehit {
+  position: absolute;
+  top: 6%;
+  bottom: 4%;
+  left: calc(50% - var(--model-w) * 0.22);
+  width: calc(var(--model-w) * 0.44);
+  z-index: 1;
+  cursor: pointer;
 }
 
 /*
@@ -438,8 +493,17 @@
     transition: none;
   }
 
-  .fit__drawer {
+  .fit__drawer,
+  .fit__slot[data-wrap='true'] {
     animation: none;
+  }
+
+  .fit__slot {
+    transition: none;
+  }
+
+  .fit__row[data-moving='true'] .fit__slot {
+    filter: none;
   }
 
   .fit__stage[data-working='true']::after {
@@ -480,33 +544,36 @@
     gap: 6px;
   }
 
+  /* Model on top, then the two rows under it; the worn piece stays visible, in the middle. */
   .fit__floor {
-    display: block;
+    --model-w: var(--tile);
+    --gap: 10px;
   }
 
   .fit__stage {
+    position: relative;
+    left: auto;
+    width: auto;
     height: min(68dvh, 560px);
     margin-block: 8px;
   }
 
+  .fit__stagehit {
+    left: 28%;
+    width: 44%;
+  }
+
   .fit__row {
-    display: flex;
-    gap: 10px;
-    margin: 0 0 10px;
-    padding: 4px var(--gutter);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
+    position: relative;
+    top: auto;
+    margin-bottom: 10px;
+    overflow: hidden;
   }
 
-  .fit__row::-webkit-scrollbar {
-    display: none;
-  }
-
-  .fit__row li {
-    flex: none;
-    scroll-snap-align: center;
+  .fit__slot[data-slot='0'] {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
   }
 
   .fit__caption {

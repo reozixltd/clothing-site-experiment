@@ -35,7 +35,7 @@ Needs Node 22.18 or newer (`npm test` runs the TypeScript test file directly).
 | Bag counter | The header bag icon counts added items (there is no checkout) |
 | Leave detail | "All looks" button or Escape |
 | Phone layout | Three models on stage, rail moves below, nav becomes a scrollable row |
-| Fitting Room | Pick a top and a bottom and the model wears them; click the worn piece for sizes; "Try it on me" puts your own head on the model |
+| Fitting Room | Scroll two sliding carousels of tops and bottoms and the model wears the centre pieces; click the model for sizes; "Try it on me" puts your own head on the model |
 
 ## Folder structure
 
@@ -233,20 +233,22 @@ and walks in from off stage (`@keyframes walk-in`).
 
 ## The Fitting Room (`#fitting`)
 
-The third section. One model stands centre stage on the colour of their own studio wall, with four tops
-on the upper row and four bottoms on the lower, two each side. Him / Her switches model; each keeps their
-own outfit. Click a piece and the model is wearing it: a cross-fade to a real photo of that outfit. Click
-the worn piece (or its name under the model) for sizes and Add to bag. Escape or the X closes it.
+The third section. One model stands centre stage on the colour of their own studio wall. Two looping
+carousels run across them: five tops at chest height and five bottoms at leg height, two showing each side;
+the centre piece is the one being worn. Scroll (wheel or trackpad) over a row, swipe it, press the arrow
+keys, or click a piece and the row slides one step, with a cross-fade to a real photo of that outfit.
+Him / Her switches model; each keeps their own outfit. Click the model (or a piece's name under them) for
+sizes and Add to bag. Escape or the X closes it.
 
-**No virtual try-on model runs for this.** Every combination is its own Flow photo: 4 tops x 4 bottoms
-= 16 photos per model, made with Nano Banana in Google Flow (0 credits) by attaching the base outfit photo
+**No virtual try-on model runs for this.** Every combination is its own Flow photo: 5 tops x 5 bottoms
+= 25 photos per model, made with Nano Banana in Google Flow (0 credits) by attaching the base outfit photo
 and asking for the same person, pose, framing and backdrop wearing the new pieces. The garment cutouts are
 Flow packshots on magenta. `python flow/fitting.py` turns `flow/fitting/` into `public/fitting/` (outfits
 768 x 1376 WebP, cutouts 800 x 1000 transparent) and prints each model's wall colour for `backdrop` in
 `src/data/fitting.ts`.
 
 To add a garment: one packshot, plus one outfit photo for every piece it can be worn with (a new top for
-one model = 4 photos), named `<top>__<bottom>.jpg`. Check the head lines up with the base photo, or the
+one model = 5 photos), named `<top>__<bottom>.jpg`. Check the head lines up with the base photo, or the
 cross-fade jumps.
 
 ### Try it on me

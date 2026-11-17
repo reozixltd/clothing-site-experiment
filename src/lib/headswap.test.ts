@@ -23,8 +23,8 @@ test('error event and junk', () => {
 
 test('every model has 4 new tops and 4 bottoms', () => {
   for (const m of FIT_MODELS) {
-    assert.equal(m.tops.length, 4);
-    assert.equal(m.bottoms.length, 4);
+    assert.equal(m.tops.length, 5);
+    assert.equal(m.bottoms.length, 5);
     for (const t of m.tops) assert.ok(!RACK.some((p) => p.id === t.id));
   }
   assert.equal(pieceSrc('tops', 'x'), '/fitting/tops/x.webp');
