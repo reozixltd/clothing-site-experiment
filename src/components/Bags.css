@@ -284,12 +284,32 @@
   z-index: 40;
   background: var(--bg);
   /* It takes the pointer, so a wheel over it scrolls the page instead of stepping the hidden bags. */
-  transition: opacity 600ms var(--ease);
+  transition: background-color 900ms var(--ease);
 }
 
+/* The ending: the cover clears while every bag flies from the ring to its place on the line. */
 .bags__intro[data-phase='out'] {
-  opacity: 0;
+  background-color: transparent;
   pointer-events: none;
+}
+
+.bags__intro[data-phase='out'] .bags__ring li {
+  top: 58%;
+  width: var(--w);
+  translate: calc(-50% + var(--n) * var(--dx)) calc(-50% + var(--n) * var(--dy));
+  scale: calc(1 - var(--a) * 0.08);
+  /* The line's own fade; slot 0 is the bag in her hand, so it melts into the photo. */
+  opacity: clamp(0, min(var(--a), 3.4 - var(--a)), 1);
+  transition:
+    top 900ms var(--ease),
+    width 900ms var(--ease),
+    translate 900ms var(--ease),
+    scale 900ms var(--ease),
+    opacity 900ms var(--ease);
+}
+
+.bags__intro[data-phase='out'] .bags__count {
+  opacity: 0;
 }
 
 .bags__ring {
@@ -347,6 +367,7 @@
   font-size: clamp(72px, 12vw, 200px);
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  transition: opacity 400ms var(--ease);
 }
 
 .bags__count small {

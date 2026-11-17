@@ -305,7 +305,7 @@ and a scatter of glints run up her, cut to her silhouette (`.bags__magic`, maske
 uses the same `useCarousel` as the shoes, so the wheel lets the page go at the first and last bag.
 
 The first time the section is half on screen, an intro covers it: the bags fly out of the middle into a
-turning ring while a counter runs 000 to 100, then it fades (about 3 s). It plays once, never blocks the
+turning ring while a counter runs 000 to 100, then every bag flies from the ring to its place on the diagonal line while the cover clears (about 3.5 s). It plays once, never blocks the
 page scroll, and is skipped under reduced motion.
 
 Every model photo was made in Flow from the first one ("the exact same photo, only change the bag and

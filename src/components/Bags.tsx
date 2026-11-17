@@ -118,13 +118,17 @@ export function Bags({ onAddToBag }: { onAddToBag: (items: number) => void }) {
         </button>
       </div>
 
-      <Intro />
+      <Intro slots={slots} />
     </section>
   );
 }
 
-/** The intro: the bags fly into a turning ring while a counter runs 000 to 100, then it all fades away. */
-function Intro() {
+/**
+ * The intro: the bags fly into a turning ring while a counter runs 000 to 100, then each bag flies to
+ * its place on the diagonal line (`slots`, the line's own positions) as the cover clears, and the real
+ * line takes over.
+ */
+function Intro({ slots }: { slots: number[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const [count, setCount] = useState(0);
   const [phase, setPhase] = useState<'wait' | 'run' | 'out' | 'done'>(() =>
@@ -153,6 +157,12 @@ function Intro() {
     return () => cancelAnimationFrame(raf);
   }, [phase]);
 
+  useEffect(() => {
+    if (phase !== 'out') return;
+    const t = setTimeout(() => setPhase('done'), 1000);
+    return () => clearTimeout(t);
+  }, [phase]);
+
   if (phase === 'done') return null;
   return (
     <div
@@ -160,11 +170,10 @@ function Intro() {
       ref={ref}
       data-phase={phase}
       aria-hidden
-      onTransitionEnd={() => phase === 'out' && setPhase('done')}
     >
       <ul className="bags__ring">
         {BAGS.map((b, i) => (
-          <li key={b.id} style={{ '--i': i, '--of': BAGS.length } as CSSProperties}>
+          <li key={b.id} style={{ '--i': i, '--of': BAGS.length, '--n': slots[i], '--a': Math.abs(slots[i]) } as CSSProperties}>
             <img src={pack(b.id)} alt="" />
           </li>
         ))}
