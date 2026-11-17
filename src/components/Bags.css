@@ -30,12 +30,12 @@
   top: clamp(16px, 4vh, 40px);
   left: 0;
   right: 0;
-  font-size: clamp(44px, 10.5vw, 190px);
-  font-weight: 700;
-  line-height: 0.88;
-  letter-spacing: -0.04em;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(56px, 9.5vw, 170px);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
   text-align: center;
-  text-transform: uppercase;
 }
 
 .bags__line {
@@ -76,6 +76,14 @@
   user-select: none;
 }
 
+.bags__label {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+
 .bags__model {
   position: absolute;
   bottom: 0;
@@ -85,12 +93,78 @@
   opacity: 0;
   pointer-events: none;
   user-select: none;
-  transition: opacity 420ms var(--ease);
+  /* The old pose dissolves into light; the new one comes into focus out of it. */
+  filter: blur(10px) brightness(1.5);
+  transition:
+    opacity 520ms var(--ease),
+    filter 520ms var(--ease);
 }
 
 .bags__model[data-on='true'] {
   opacity: 1;
+  filter: none;
 }
+
+/* The shimmer: the same box as the model photo, masked to her silhouette. */
+.bags__magic {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  height: 90%;
+  aspect-ratio: 768 / 1376;
+  translate: -50% 0;
+  pointer-events: none;
+  mask: var(--mask) center / 100% 100% no-repeat;
+  /* A band of warm light that runs up her body. */
+  background: linear-gradient(transparent 36%, rgb(255 236 200 / 0.85) 47%, #fff 50%, rgb(255 220 160 / 0.75) 54%, transparent 64%) 0 100% / 100% 300% no-repeat;
+  mix-blend-mode: plus-lighter;
+  animation: bag-magic 1100ms var(--ease) both;
+}
+
+/* Glints: three dot grids on prime spacings, so they read as scattered sparkles, twinkling as they rise. */
+.bags__magic::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle, #fff 0 1.6px, transparent 2.6px) 3px 9px / 37px 53px,
+    radial-gradient(circle, #ffe2a8 0 1.2px, transparent 2.2px) 19px 31px / 53px 41px,
+    radial-gradient(circle, #fff 0 2.2px, rgb(255 255 255 / 0.4) 3px, transparent 5px) 41px 7px / 71px 89px;
+  animation: bag-glint 1100ms linear both;
+}
+
+@keyframes bag-magic {
+  0% {
+    opacity: 1;
+    background-position: 0 100%;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    background-position: 0 0;
+  }
+}
+
+@keyframes bag-glint {
+  0%,
+  100% {
+    opacity: 0;
+    translate: 0 30px;
+  }
+  20%,
+  60% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.35;
+  }
+  100% {
+    translate: 0 -30px;
+  }
+}
+
 
 .bags__info {
   position: absolute;
@@ -106,15 +180,49 @@
 
 .bags__name,
 .bags__note,
-.bags__price {
+.bags__price,
+.bags__kicker,
+.bags__details {
   margin: 0;
 }
 
+.bags__kicker {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.bags__details {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding-block: 6px;
+  border-block: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.bags__details div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bags__details dt {
+  color: var(--muted);
+}
+
+.bags__details dd {
+  margin: 0;
+  text-align: right;
+}
+
 .bags__name {
-  font-size: clamp(26px, 3vw, 44px);
-  font-weight: 700;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(30px, 3.4vw, 52px);
+  font-weight: 400;
   line-height: 1;
-  letter-spacing: -0.02em;
 }
 
 .bags__note,
@@ -136,7 +244,7 @@
   display: grid;
   gap: 6px;
   justify-items: center;
-  width: 104px;
+  width: 120px;
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -152,6 +260,98 @@
   width: 100%;
 }
 
+.bags__cardname {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ---------- The intro: a ring of bags turning while the counter runs to 100. ---------- */
+@property --spin {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@property --open {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+.bags__intro {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: var(--bg);
+  pointer-events: none;
+  transition: opacity 600ms var(--ease);
+}
+
+.bags__intro[data-phase='out'] {
+  opacity: 0;
+}
+
+.bags__ring {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bags__intro[data-phase='run'] .bags__ring,
+.bags__intro[data-phase='out'] .bags__ring {
+  animation:
+    ring-spin 3.2s linear forwards,
+    ring-open 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes ring-spin {
+  to {
+    --spin: 200deg;
+  }
+}
+
+@keyframes ring-open {
+  to {
+    --open: 1;
+  }
+}
+
+/* Each bag on an ellipse; --open grows it from a point in the middle out to the ring. */
+.bags__ring li {
+  --t: calc(var(--spin) + var(--i) / var(--of) * 360deg);
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  width: clamp(56px, 7vw, 110px);
+  translate: calc(-50% + cos(var(--t)) * 30vw * var(--open)) calc(-50% + sin(var(--t)) * 22svh * var(--open));
+  scale: calc(0.75 + sin(var(--t)) * 0.25);
+  z-index: calc(10 + round(sin(var(--t)) * 10));
+  opacity: var(--open);
+}
+
+.bags__ring img {
+  display: block;
+  width: 100%;
+  filter: drop-shadow(0 10px 10px rgb(21 21 23 / 0.14));
+}
+
+.bags__count {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 12px;
+  margin: 0;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(72px, 12vw, 200px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.bags__count small {
+  font-size: 0.2em;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bags__slot,
   .bags__slot[data-wrap='true'],
@@ -159,6 +359,14 @@
   .bags__card {
     transition: opacity var(--quick);
     animation: none;
+  }
+
+  .bags__model {
+    filter: none;
+  }
+
+  .bags__magic {
+    display: none;
   }
 }
 
@@ -173,9 +381,24 @@
     top: 76px;
   }
 
-  .bags__model {
+  .bags__model,
+  .bags__magic {
     height: 66%;
     bottom: 22%;
+  }
+
+  .bags__label,
+  .bags__note,
+  .bags__card span {
+    display: none;
+  }
+
+  .bags__details {
+    font-size: 12px;
+  }
+
+  .bags__ring li {
+    translate: calc(-50% + cos(var(--t)) * 36vw * var(--open)) calc(-50% + sin(var(--t)) * 16svh * var(--open));
   }
 
   .bags__slot {

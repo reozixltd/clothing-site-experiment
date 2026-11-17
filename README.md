@@ -38,7 +38,7 @@ Needs Node 22.18 or newer (`npm test` runs the TypeScript test file directly).
 | Phone layout | Three models on stage, rail moves below, nav becomes a scrollable row |
 | Fitting Room | Scroll two sliding carousels of tops and bottoms and the model wears the centre pieces; click the model for sizes; "Try it on me" puts your own head on the model |
 | Shoes | Scroll a diagonal line of floating shoes; click the front one for a product view with sizes, thumbnails and Add to bag |
-| Bags | "One model. Every bag.": scroll a diagonal line of bags behind one model and she holds each bag in turn |
+| Bags | "One model. Every bag.": a ring of bags counts to 100 the first time you reach it, then you scroll a diagonal line of nine bags behind one model; she carries each in its own pose, with a shimmer as it changes, and each bag shows its type, material, size and strap |
 
 ## Folder structure
 
@@ -245,7 +245,9 @@ and walks in from off stage (`@keyframes walk-in`).
 The third section. One model stands centre stage on the colour of their own studio wall. Two looping
 carousels run across them: five tops at chest height and five bottoms at leg height, two showing each side;
 the centre piece is the one being worn. Scroll (wheel or trackpad) over a row, swipe it, press the arrow
-keys, or click a piece and the row slides one step, with a cross-fade to a real photo of that outfit.
+keys, or click a piece and the row slides one step. The pieces float at about body scale with no cards,
+and fade the further they are from the model. The incoming piece slides into the model and dissolves
+while the photo cross-fades (with a blur) to that outfit; the piece she was wearing slides back out.
 Him / Her switches model; each keeps their own outfit. Click the model (or a piece's name under them) for
 sizes and Add to bag. Escape or the X closes it.
 
@@ -295,13 +297,20 @@ To add a shoe: one Flow packshot on magenta, side view with the toe pointing lef
 ## Bags (`#bags`)
 
 The fifth section. The headline "One model. Every bag." sits behind one model; small bags hang on a
-diagonal line behind her, the active bag's name, note, price and Add to bag sit bottom left, and a
-card top right shows the active bag. Each scroll step (or swipe, arrow key, arrow button, or click on a
-bag in the line) slides the line one bag on and cross-fades to the photo of her holding that bag. It
+diagonal line behind her, each with its name under it. Bottom left: number and type, name, note,
+material / size / strap, price and Add to bag. Top right: a card with the bag, its name and price.
+Each scroll step (or swipe, arrow key, arrow button, or click on a bag in the line) slides the line one
+bag on. Her old pose dissolves into light and the new one comes into focus, while a band of warm light
+and a scatter of glints run up her, cut to her silhouette (`.bags__magic`, masked with the new photo). It
 uses the same `useCarousel` as the shoes, so the wheel lets the page go at the first and last bag.
 
-Every model photo was made in Flow from the first one ("the exact same photo, only change the bag")
-with that bag's packshot attached, so she, her pose and the framing stay put and only the bag changes.
+The first time the section is half on screen, an intro covers it: the bags fly out of the middle into a
+turning ring while a counter runs 000 to 100, then it fades (about 3 s). It plays once, never blocks the
+page scroll, and is skipped under reduced motion.
+
+Every model photo was made in Flow from the first one ("the exact same photo, only change the bag and
+her pose") with that bag's packshot attached, so her head and the framing stay put (checked to the
+pixel) and only her arms and the bag change.
 
 To add a bag: a Flow packshot on magenta saved as `flow/bags/<id>.jpg`; a photo of her holding it, made
 the same way, saved as `flow/bags/model/<id>.jpg`; run `python flow/fitting.py`; add a row to
@@ -330,5 +339,4 @@ Everything visual is set in `src/styles/tokens.css`:
 - "See availability" from the reference rail design (no stock data).
 - Search, account, cart contents and checkout. The buttons are there, the features are not.
 - A dark theme.
-- The bag reference's intro loader (bags in a ring counting to 100).
 - Prices are sample data.

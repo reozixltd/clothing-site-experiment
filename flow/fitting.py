@@ -39,8 +39,10 @@ def keyed(src):
     return Image.fromarray(a.astype(np.uint8), 'RGBA')
 
 
-def packshot(src, dst, W=W, H=H, floor=False):
+def packshot(src, dst, W=W, H=H, floor=False, fix=None):
     im = keyed(src)
+    if fix:
+        im = fix(im)
     box = (np.asarray(im.getchannel('A')) > 24)
     ys, xs = np.nonzero(box)
     part = im.crop((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1))
@@ -62,7 +64,10 @@ def shoes():
 def despill(im, band=25):
     """Magenta spill on opaque pixels near the edge (hair, arms): pull red and blue back to green."""
     a = np.asarray(im).astype(np.int16)
-    near = np.asarray(im.getchannel('A').filter(ImageFilter.MinFilter(band))) < 250
+    m = im.getchannel('A')
+    for _ in range(max(1, band // 8)):  # repeated 9 px passes: a wide MinFilter(band) is very slow
+        m = m.filter(ImageFilter.MinFilter(9))
+    near = np.asarray(m) < 250
     # Skin and hair have blue below green; any edge pixel with blue above green is backdrop.
     pink = near & (a[..., 2] > a[..., 1] + 15)
     # Strong magenta anywhere (backdrop caught between arm and body).
@@ -73,14 +78,25 @@ def despill(im, band=25):
     return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), 'RGBA')
 
 
+def unpink(im):
+    """Pink light from the backdrop on pale leather: bright pixels with red and blue above green go neutral."""
+    a = np.asarray(im).astype(np.int16)
+    g = a[..., 1]
+    pink = (g > 120) & (a[..., 2] > g) & (a[..., 0] > g + 5)
+    a[..., 0] = np.where(pink, g + (a[..., 0] - g) * 0.3, a[..., 0])
+    a[..., 2] = np.where(pink, g, a[..., 2])
+    return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), 'RGBA')
+
+
 def bags():
     """flow/bags/<id>.jpg -> 800 x 800 cutouts in public/bags/; flow/bags/model/<id>.jpg (the model
     holding that bag, magenta backdrop) -> full-frame cutouts in public/bags/model/, so every photo lines up."""
     os.makedirs('public/bags/model', exist_ok=True)
     for src in sorted(glob.glob('flow/bags/*.jpg')):
-        packshot(src, f'public/bags/{os.path.basename(src)[:-4]}.webp', 800, 800)
+        # Pale bags (the white Moon) pick up pink light from the backdrop.
+        packshot(src, f'public/bags/{os.path.basename(src)[:-4]}.webp', 800, 800, fix=lambda im: unpink(despill(im)))
     for src in sorted(glob.glob('flow/bags/model/*.jpg')):
-        despill(keyed(src)).save(f'public/bags/model/{os.path.basename(src)[:-4]}.webp', quality=86, method=6)
+        unpink(despill(keyed(src))).save(f'public/bags/model/{os.path.basename(src)[:-4]}.webp', quality=86, method=6)
 
 
 def main():
