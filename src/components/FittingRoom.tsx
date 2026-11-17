@@ -332,7 +332,7 @@ function Row({ kind, pieces, worn, onWear }: { kind: Kind; pieces: Piece[]; worn
             className="fit__slot"
             data-slot={sl}
             data-wrap={wrapped[i]}
-            style={{ '--n': sl, '--s': Math.sign(sl) } as CSSProperties}
+            style={{ '--n': sl, '--a': Math.abs(sl), '--s': Math.sign(sl) } as CSSProperties}
             aria-hidden={Math.abs(sl) > 2}
           >
             <button
