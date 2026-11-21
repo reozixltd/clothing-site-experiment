@@ -81,3 +81,158 @@ svg {
     animation-delay: 0s !important;
   }
 }
+
+/* ---- Shared primitives of the design system (see tokens.css) ---- */
+
+/* A section headline: bold grotesk, tight, with an optional grey or lime second part. */
+.h-display {
+  font-size: clamp(36px, 5.2vw, 76px);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+.h-section {
+  font-size: clamp(28px, 3.4vw, 48px);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+.h-grey {
+  color: var(--faint);
+}
+.h-lime {
+  color: var(--accent-ink);
+}
+
+/* "01 // HEADWEAR", "STYLED HEAD TO TOE": mono caps, small, spaced. */
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* A lime tag ("NEW DROP", "SAVE 10%"). */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--pill);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Buttons: black pill by default, lime for the main action, ghost for secondary. Mono caps. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 22px;
+  border-radius: var(--pill);
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition:
+    transform var(--quick) var(--ease),
+    box-shadow var(--quick),
+    background-color var(--quick);
+}
+.btn:hover {
+  transform: translateY(-1px);
+}
+.btn:active {
+  transform: translateY(0) scale(0.98);
+}
+.btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.btn--lime {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 8px 24px -8px rgb(214 255 31 / 0.7);
+}
+.btn--ghost {
+  background: transparent;
+  color: inherit;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+.btn svg {
+  font-size: 16px;
+}
+
+/* Filter pills: "All Looks / Men / Women". The chosen one is black. */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.pill {
+  padding: 8px 16px;
+  border-radius: var(--pill);
+  font-size: 13px;
+  color: var(--muted);
+  transition:
+    color var(--quick),
+    background-color var(--quick);
+}
+.pill:hover {
+  color: var(--ink);
+}
+.pill[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+/* A white card on the page. */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+/* A dark panel (order summary, countdown, remix preview). */
+.panel-dark {
+  background: var(--dark);
+  color: var(--on-dark);
+  border-radius: calc(var(--radius) + 6px);
+}
+
+/* Centred page width for the new storefront sections. */
+.wrap {
+  width: min(100% - 2 * var(--gutter), var(--max));
+  margin-inline: auto;
+}
+.section {
+  padding-block: clamp(64px, 9vw, 128px);
+}
+
+/* Fade-and-rise as a section scrolls in (skipped where unsupported). */
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      translate: 0 32px;
+    }
+  }
+}

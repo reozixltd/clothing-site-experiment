@@ -8,10 +8,11 @@ interface Props {
   cart: CartItem[];
   onQty: (key: string, qty: number) => void;
   onClose: () => void;
+  onCheckout: () => void;
 }
 
 /** The bag: every line with its size and quantity, remove, and the subtotal. */
-export function Cart({ cart, onQty, onClose }: Props) {
+export function Cart({ cart, onQty, onClose, onCheckout }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [note, setNote] = useState(false);
 

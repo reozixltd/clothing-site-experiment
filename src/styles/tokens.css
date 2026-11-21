@@ -1,28 +1,42 @@
 /*
  * Design tokens. Change the look of the whole site from here.
  *
- * Palette: cool off-white studio, near-black ink, one accent (signal red) used
- * only for pins and the bag counter.
- * Radius rule: interactive controls are full pills, images and rows use --radius.
+ * System: white studio, near-black ink, one neon lime accent. Headlines are a
+ * tight bold grotesk with a grey second line ("Menswear. / Redefined."); small
+ * labels, eyebrows and button text are mono caps. Dark panels (#0b0b0c) carry
+ * summaries, countdowns and the footer, with lime as the only colour on them.
+ * Radius rule: interactive controls are full pills, cards use --radius.
  */
 :root {
-  --bg: #f1f1ef;
-  --surface: #fafaf9;
-  --ink: #151517;
-  --muted: #66666b;
-  --line: #d9d9d5;
-  --accent: #c63a18;
-  --on-accent: #fafaf9;
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --ink: #0b0b0c;
+  --muted: #6b6b70;
+  --faint: #a3a3a8; /* the grey second line of a headline */
+  --line: #e6e6e3;
+  --accent: #d6ff1f; /* neon lime */
+  --accent-ink: #4f6b00; /* lime that reads on white ("Try the Look.") */
+  --on-accent: #0b0b0c;
 
-  --radius: 12px;
+  --dark: #0b0b0c;
+  --dark-2: #161618;
+  --dark-line: #2a2a2d;
+  --on-dark: #f4f4f2;
+  --on-dark-muted: #8d8d93;
+
+  --radius: 18px;
+  --radius-sm: 12px;
   --pill: 999px;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px -12px rgb(0 0 0 / 0.12);
 
   --font: 'Geist Variable', system-ui, sans-serif;
+  --mono: 'Geist Mono Variable', ui-monospace, monospace;
 
   --ease: cubic-bezier(0.22, 0.8, 0.2, 1);
   --slide: 720ms; /* how long a look takes to walk one slot */
   --quick: 220ms;
 
-  --header-h: 64px;
+  --header-h: 76px;
   --gutter: clamp(16px, 3vw, 40px);
+  --max: 1320px;
 }
