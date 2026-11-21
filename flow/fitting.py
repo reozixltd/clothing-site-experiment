@@ -123,6 +123,13 @@ def bags():
         unpink(despill(keyed(src))).save(f'public/bags/model/{os.path.basename(src)[:-4]}.webp', quality=86, method=6)
 
 
+def headwear():
+    """flow/remix/headwear/<id>.jpg (magenta backdrop) -> 800 x 800 cutouts in public/remix/headwear/ (Remix Deck)."""
+    os.makedirs('public/remix/headwear', exist_ok=True)
+    for src in sorted(glob.glob('flow/remix/headwear/*.jpg')):
+        packshot(src, f'public/remix/headwear/{os.path.basename(src)[:-4]}.webp', 800, 800, fix=lambda im: unpink(despill(im)))
+
+
 def main():
     n = 0
     for src in sorted(glob.glob('flow/fitting/*/*.jpg')):
@@ -142,8 +149,9 @@ def main():
         n += 1
     shoes()
     bags()
+    headwear()
     print(f'{n} images')
     print('backdrop #%02x%02x%02x' % GREY)
 
 if __name__ == '__main__':
-    main()
+    headwear() if sys.argv[1:] == ['headwear'] else main()

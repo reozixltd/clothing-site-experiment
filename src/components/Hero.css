@@ -130,6 +130,8 @@
   height: min(88svh, 960px);
   aspect-ratio: 9 / 16;
   mix-blend-mode: multiply;
+  /* Feather the frame so no video edge shows (the model sits in the middle 50%). */
+  mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
   translate: var(--px, 0) var(--py, 0);
   transition: translate 500ms var(--ease);
   animation: fade 1000ms ease 200ms both;

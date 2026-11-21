@@ -33,7 +33,14 @@ Needs Node 22.18 or newer (`npm test` runs the TypeScript test file directly).
 | 360° badge | The centre model shows a small spinning "360°" pill when its look can be turned; in the detail view it reads "Drag to turn" |
 | Pins | Hover, focus or tap a pin to see the piece and its price. It also highlights the row in the rail |
 | Product rail | Lists the three pieces of the centre look, the total, and "Add all to bag" |
-| Bag counter | The header bag icon counts added items (there is no checkout) |
+| Hero | A looping 4 s model film (`public/hero/hero.mp4`, poster `poster.webp`) on white, blended into the page with `multiply` and feathered at the sides |
+| Try the Look | Three models side by side with garment hotspots; a "Shop This Look" panel lists the pieces, the total and "Add full look to bag" |
+| Remix Deck (`#remix`) | Four carousels (headwear, top, bottom, footwear) with lock and shuffle; a dark card stacks the picks with the bundle price. Pick a size, then "Add remix fit" |
+| Editorial Looks (`#gallery`) | 12 styled outfits; "Shop full look" adds the bundle at 10% off |
+| Identity (`#identity`) | A curved 3D carousel of the 8 editorial photos in `public/editorial/` |
+| Reviews, Drop | Customer stories with rating; a dark countdown card to the next drop with an email field (not sent anywhere) |
+| Bag | Drawer with quantities, remove, promo code `HALDEN10`, free shipping bar; kept in `localStorage` |
+| Checkout (`#checkout`) | Contact and address, shipping speed, dark order summary. No payment is taken; "Place order" only clears the bag |
 | Leave detail | "All looks" button or Escape |
 | Phone layout | Three models on stage, rail moves below, nav becomes a scrollable row |
 | Fitting Room | Scroll two sliding carousels of tops and bottoms and the model wears the centre pieces; click the model for sizes; "Try it on me" puts your own head on the model |
@@ -322,10 +329,20 @@ the same way, saved as `flow/bags/model/<id>.jpg`; run `python flow/fitting.py`;
 
 Everything visual is set in `src/styles/tokens.css`:
 
-- `--bg`, `--surface`, `--ink`, `--muted`, `--line`: the neutral palette
-- `--accent`: the one accent colour, used only for pins and the bag counter
-- `--radius` and `--pill`: controls are pills, images and rows use `--radius`
+- `--bg`, `--surface`, `--ink`, `--muted`, `--faint`, `--line`: the neutral palette (`--faint` is the grey second line of a headline)
+- `--accent` neon lime and `--accent-ink` (the lime that reads on white); `--dark*` / `--on-dark*` for the dark panels and footer
+- `--font` Geist and `--mono` Geist Mono (labels, eyebrows, button text)
+- `--radius` and `--pill`: controls are pills, cards use `--radius`
 - `--slide`: how long a look takes to move one slot
+
+Shared classes at the end of `src/styles/base.css`: `.h-display` / `.h-section` with `.h-grey` / `.h-lime`, `.eyebrow`, `.tag`, `.btn` (`--lime`, `--ghost`), `.pills` / `.pill`, `.card`, `.panel-dark`, `.wrap`, `.section`, `.reveal`.
+
+## Storefront imagery
+
+- Headwear: Flow stills on magenta in `flow/remix/headwear/<id>.jpg`; `python flow/fitting.py headwear` (from the repo root) cuts them out to `public/remix/headwear/<id>.webp`.
+- Editorial: Flow stills in `flow/storefront/ed-<n>.jpg`, scaled and cropped to 720x960 in `public/editorial/<n>.webp`.
+- Hero film: Omni 1.2 Flash, 4 s, same start and end frame so it loops. Source `flow/storefront/hero.mp4`; the site copy is levelled to pure white and scaled to 720x1280:
+  `ffmpeg -i flow/storefront/hero.mp4 -an -vf "colorlevels=rimax=0.92:gimax=0.92:bimax=0.92,scale=720:1280" -c:v libx264 -crf 22 -movflags +faststart public/hero/hero.mp4`
 
 ## Accessibility
 
@@ -339,6 +356,8 @@ Everything visual is set in `src/styles/tokens.css`:
 
 - The other nav pages. Runway, Rail, Fitting Room, Shoes and Bags are sections of the one page; the other links go nowhere.
 - "See availability" from the reference rail design (no stock data).
-- Search, account, cart contents and checkout. The buttons are there, the features are not.
+- Search and account. The buttons are there, the features are not.
+- Payment. Checkout is the full form and summary, but no payment step runs and no order is sent.
+- The drop and newsletter email fields do not send anything.
 - A dark theme.
 - Prices are sample data.
