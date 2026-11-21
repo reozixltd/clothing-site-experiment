@@ -32,10 +32,11 @@
 }
 
 .fit__title {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: clamp(22px, 2.2vw, 30px);
+}
+
+.fit__heading .eyebrow {
+  margin-bottom: 2px;
 }
 
 .fit__try {
@@ -45,16 +46,18 @@
 .fit__models {
   display: inline-flex;
   padding: 3px;
-  border: 1px solid rgb(21 21 23 / 0.16);
   border-radius: var(--pill);
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 .fit__models button {
-  padding: 6px 18px;
+  padding: 7px 18px;
   border-radius: var(--pill);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
   transition:
@@ -64,7 +67,7 @@
 
 .fit__models button[aria-pressed='true'] {
   background: var(--ink);
-  color: var(--bg);
+  color: var(--surface);
 }
 
 .fit__floor {
@@ -243,7 +246,10 @@
   justify-content: center;
   gap: 6px;
   padding-top: 10px;
-  font-size: 13px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--muted);
 }
 
@@ -280,10 +286,21 @@
   padding-inline: 20px;
   border-radius: var(--pill);
   background: var(--ink);
-  color: var(--bg);
-  font-size: 13px;
-  font-weight: 500;
-  transition: transform var(--quick) var(--ease);
+  color: var(--surface);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition:
+    transform var(--quick) var(--ease),
+    background-color var(--quick),
+    color var(--quick);
+}
+
+.fit__trybtn:hover {
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .fit__trybtn:active {
@@ -291,7 +308,7 @@
 }
 
 .fit__link {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -386,7 +403,7 @@
 
 .fit__error {
   font-size: 13px;
-  color: var(--accent);
+  color: #b42318;
 }
 
 /* ---------- Drawer ---------- */
@@ -405,6 +422,7 @@
   width: min(380px, 100%);
   padding: 64px 28px 28px;
   background: var(--surface);
+  border-radius: var(--radius) 0 0 var(--radius);
   box-shadow: -24px 0 48px rgb(21 21 23 / 0.12);
   text-align: center;
   animation: drawer-in 420ms var(--ease) backwards;
@@ -418,14 +436,18 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid var(--line);
   border-radius: var(--pill);
+  background: var(--ink);
+  color: var(--surface);
   font-size: 18px;
-  transition: border-color var(--quick);
+  transition:
+    background-color var(--quick),
+    color var(--quick);
 }
 
 .fit__close:hover {
-  border-color: var(--ink);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .fit__shot {
@@ -436,16 +458,16 @@
 }
 
 .fit__name {
-  font-size: 18px;
+  font-size: 26px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
 }
 
 .fit__price {
   margin-top: -6px;
-  font-size: 14px;
-  color: var(--muted);
+  font-size: 15px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
@@ -459,7 +481,9 @@
   height: 42px;
   border: 1px solid var(--line);
   border-radius: var(--pill);
-  font-size: 13px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
   transition:
     border-color var(--quick),
     background-color var(--quick),
@@ -472,8 +496,8 @@
 
 .fit__sizes button[aria-pressed='true'] {
   border-color: var(--ink);
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .fit__cta {
@@ -481,10 +505,14 @@
   height: 48px;
   margin-top: 4px;
   border-radius: var(--pill);
-  background: var(--ink);
-  color: var(--bg);
-  font-size: 14px;
-  font-weight: 500;
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 8px 24px -8px rgb(214 255 31 / 0.7);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   transition: transform var(--quick) var(--ease);
 }
 
@@ -495,6 +523,7 @@
 .fit__cta:disabled {
   background: var(--line);
   color: var(--muted);
+  box-shadow: none;
   cursor: default;
 }
 
@@ -619,7 +648,7 @@
     max-height: 88dvh;
     overflow-y: auto;
     padding-top: 56px;
-    border-radius: 20px 20px 0 0;
+    border-radius: var(--radius) var(--radius) 0 0;
     box-shadow: 0 -24px 48px rgb(21 21 23 / 0.16);
     animation-name: sheet-in;
   }

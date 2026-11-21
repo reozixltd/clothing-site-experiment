@@ -20,9 +20,9 @@
 
 .runway__title {
   font-size: clamp(36px, 4.6vw, 68px);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.045em;
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
 }
 
 .runway__title--look {
@@ -36,12 +36,7 @@
 }
 
 .runway__eyebrow {
-  margin-bottom: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
+  margin-bottom: 10px;
 }
 
 /* ---------- Stage ---------- */
@@ -139,8 +134,11 @@
   border: 1px solid var(--line);
   border-radius: var(--pill);
   background: var(--surface);
-  font-size: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   white-space: nowrap;
   pointer-events: none;
   animation: rise 520ms var(--ease) 300ms backwards;
@@ -259,7 +257,8 @@
   font-size: 13px;
   font-weight: 600;
   box-shadow:
-    0 0 0 3px var(--surface),
+    0 0 0 2px var(--ink),
+    0 0 0 5px var(--surface),
     0 6px 16px rgb(21 21 23 / 0.22);
   transition: transform var(--quick) var(--ease);
 }
@@ -277,8 +276,11 @@
   padding: 7px 14px;
   border-radius: var(--pill);
   background: var(--ink);
-  color: var(--bg);
-  font-size: 13px;
+  color: var(--on-dark);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
@@ -291,7 +293,7 @@
 .pin__tip b {
   margin-left: 10px;
   font-weight: 500;
-  opacity: 0.65;
+  color: var(--accent);
 }
 
 li:hover > .pin__tip,
@@ -305,7 +307,10 @@ li:hover > .pin__tip,
   position: absolute;
   inset: auto 0 5cqh;
   text-align: center;
-  font-size: 13px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--muted);
   animation: rise 520ms var(--ease) 500ms backwards;
 }
@@ -337,10 +342,23 @@ li:hover > .pin__tip,
   height: 40px;
   min-width: 40px;
   border-radius: var(--pill);
-  background: var(--surface);
-  box-shadow: inset 0 0 0 1px var(--line);
-  font-size: 14px;
-  transition: transform var(--quick) var(--ease);
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition:
+    transform var(--quick) var(--ease),
+    background-color var(--quick),
+    color var(--quick);
+}
+
+.runway__arrow:hover,
+.runway__back:hover {
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .runway__back {
@@ -363,7 +381,9 @@ li:hover > .pin__tip,
   width: 34px;
   padding: 10px 0 0;
   text-align: left;
-  font-size: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
   /* ponytail: animates width (layout) on six tiny items; switch to scaleX if this list ever grows */
@@ -377,15 +397,20 @@ li:hover > .pin__tip,
 
 .progress__bar {
   display: block;
-  height: 2px;
+  height: 3px;
   border-radius: var(--pill);
   background: var(--line);
   transition: background-color 480ms;
 }
 
-.progress__step:hover .progress__bar,
-.progress__step[aria-current] .progress__bar {
+.progress__step:hover .progress__bar {
   background: var(--ink);
+}
+
+/* the current look's bar is lime, with an ink edge so it reads on white */
+.progress__step[aria-current] .progress__bar {
+  background: var(--accent);
+  box-shadow: 0 0 0 1px var(--ink);
 }
 
 .progress__label {

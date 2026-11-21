@@ -106,12 +106,15 @@ export function Runway({ looks, onAddToBag }: Props) {
       <div className="runway__intro" key={detail ? look.id : 'browse'}>
         {detail ? (
           <>
-            <p className="runway__eyebrow">Look {number(now.index)}</p>
+            <p className="runway__eyebrow eyebrow">Look {number(now.index)}</p>
             <h1 className="runway__title runway__title--look">{look.name}</h1>
           </>
         ) : (
           <>
-            <h1 className="runway__title">Shop the Look.</h1>
+            <p className="runway__eyebrow eyebrow">Styled head to toe</p>
+            <h1 className="runway__title">
+              Shop the <span className="h-lime">Look.</span>
+            </h1>
             <p className="runway__sub">Six looks, styled head to toe. Open one to see every piece.</p>
           </>
         )}

@@ -31,7 +31,12 @@ export function LookRail({ look, activeProduct, onActiveProduct, onAddToBag }: P
 
   return (
     <aside className="rail" aria-label="In this look">
-      <h2 className="rail__heading">In this look</h2>
+      <div>
+        <p className="eyebrow">Every piece, one tap</p>
+        <h2 className="rail__heading h-section">
+          In this <span className="h-grey">look</span>
+        </h2>
+      </div>
 
       {/* key restarts the fade-in whenever the look changes */}
       <ol className="rail__list" key={look.id}>

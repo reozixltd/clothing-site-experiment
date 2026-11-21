@@ -1,4 +1,3 @@
-import '@fontsource/instrument-serif/latin-400.css';
 import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { BAGS } from '../data/bags';
@@ -35,11 +34,14 @@ export function Bags({ onAddToBag }: { onAddToBag: (item: NewItem) => void }) {
   return (
     <section className="bags" id="bags" aria-label="Bags">
       <div className="bags__stage" tabIndex={0} aria-label="Bags: scroll or use the arrow keys" {...bind}>
-        <h2 className="bags__title">
-          One model.
-          <br />
-          Every bag.
-        </h2>
+        <div className="bags__head">
+          <p className="eyebrow">The bag edit</p>
+          <h2 className="bags__title">
+            One model.
+            <br />
+            <span className="h-grey">Every bag.</span>
+          </h2>
+        </div>
         <ul className="bags__line">
           {BAGS.map((b, i) => (
             <li
@@ -75,7 +77,7 @@ export function Bags({ onAddToBag }: { onAddToBag: (item: NewItem) => void }) {
       </div>
 
       <div className="bags__info" key={bag.id}>
-        <p className="bags__kicker">
+        <p className="bags__kicker eyebrow">
           {pad(active + 1)} / {pad(BAGS.length)} · {bag.kind}
         </p>
         <h3 className="bags__name">{bag.name}</h3>

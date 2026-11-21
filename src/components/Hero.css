@@ -1,0 +1,349 @@
+.hero {
+  position: relative;
+  background: radial-gradient(120% 90% at 50% 40%, #fff 40%, var(--bg) 100%);
+}
+
+.hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  column-gap: 24px;
+  min-height: 100svh;
+  padding-top: 96px;
+}
+
+/* ---- Copy ---- */
+.hero__copy {
+  grid-area: 1 / 1;
+  align-self: center;
+  position: relative;
+  z-index: 2;
+}
+
+.hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  color: var(--ink);
+  animation: rise 700ms var(--ease) both;
+}
+.hero__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.hero__title {
+  font-size: clamp(44px, 6.4vw, 96px);
+}
+.hero__line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+.hero__line > span {
+  display: block;
+  animation: rise 900ms var(--ease) 120ms both;
+}
+.hero__line--grey > span {
+  animation: resolve 1200ms var(--ease) 320ms both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 70%;
+  }
+}
+@keyframes resolve {
+  from {
+    opacity: 0;
+    translate: 0 40%;
+    filter: blur(14px);
+  }
+  60% {
+    opacity: 1;
+  }
+}
+
+.hero__lede {
+  max-width: 36ch;
+  margin-top: 26px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.55;
+  animation: rise 900ms var(--ease) 480ms both;
+}
+
+.hero__cta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin-top: 32px;
+  animation: rise 900ms var(--ease) 600ms both;
+}
+.hero__explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 6px 6px 22px;
+  border-radius: var(--pill);
+  background: rgb(255 255 255 / 0.8);
+  box-shadow: var(--shadow);
+  font-weight: 600;
+  font-size: 14px;
+}
+.hero__arrow {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 16px;
+  transition: translate var(--quick) var(--ease);
+}
+.hero__explore:hover .hero__arrow {
+  translate: 3px 0;
+}
+.hero__watch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.hero__watch:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ---- The model. Multiply drops the video's white backdrop into the page. ---- */
+.hero__stage {
+  grid-area: 1 / 2 / 3 / 3;
+  align-self: end;
+  height: min(88svh, 960px);
+  aspect-ratio: 9 / 16;
+  mix-blend-mode: multiply;
+  translate: var(--px, 0) var(--py, 0);
+  transition: translate 500ms var(--ease);
+  animation: fade 1000ms ease 200ms both;
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+.hero__media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+}
+
+/* ---- Side cards ---- */
+.hero__side {
+  grid-area: 1 / 3;
+  align-self: center;
+  justify-self: end;
+  width: min(100%, 300px);
+  display: grid;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+  animation: rise 900ms var(--ease) 500ms both;
+}
+.hero__card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  background: rgb(255 255 255 / 0.55);
+  border: 1px solid rgb(255 255 255 / 0.9);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px -14px rgb(0 0 0 / 0.14);
+}
+.hero__card > svg {
+  flex: none;
+  font-size: 22px;
+  color: var(--muted);
+}
+.hero__card h2 {
+  font-size: 13px;
+  font-weight: 600;
+}
+.hero__card p {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.hero__card--loved {
+  display: block;
+}
+.hero__proof {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.hero__dots {
+  display: flex;
+}
+.hero__dots i {
+  width: 22px;
+  height: 22px;
+  margin-left: -7px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: #c8294b;
+}
+.hero__dots i:first-child {
+  margin-left: 0;
+}
+.hero__dots i:nth-child(2) {
+  background: var(--ink);
+}
+.hero__dots i:nth-child(3) {
+  background: #7b8f6a;
+}
+.hero__dots i:nth-child(4) {
+  background: var(--accent);
+}
+.hero__count {
+  padding: 3px 9px;
+  border-radius: var(--pill);
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+}
+.hero__follow {
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+.hero__social {
+  display: flex;
+  gap: 12px;
+  font-size: 18px;
+  color: var(--ink);
+}
+.hero__social a:hover {
+  color: var(--muted);
+}
+
+/* ---- Foot: stats left, ticker right ---- */
+.hero__stats {
+  grid-area: 2 / 1;
+  align-self: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+  margin: 0;
+  padding: 0 0 28px;
+  list-style: none;
+  position: relative;
+  z-index: 2;
+}
+.hero__stats li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--muted);
+}
+.hero__stats li > svg {
+  font-size: 22px;
+  color: var(--ink);
+}
+.hero__stats b {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.hero__ticker {
+  grid-area: 2 / 3;
+  align-self: end;
+  justify-self: end;
+  width: min(100%, 340px);
+  margin-bottom: 28px;
+  overflow: hidden;
+  border-radius: var(--pill);
+  background: var(--ink);
+  color: var(--on-dark);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  position: relative;
+  z-index: 2;
+}
+.hero__track {
+  display: flex;
+  width: max-content;
+  padding-block: 14px;
+  animation: ticker 28s linear infinite;
+}
+@keyframes ticker {
+  to {
+    translate: -50% 0;
+  }
+}
+
+/* The side cards and ticker need the width; below this the model and copy take over. */
+@media (max-width: 1099px) {
+  .hero__side {
+    display: none;
+  }
+  .hero__grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .hero__ticker {
+    display: none;
+  }
+}
+
+/* Phone: headline, then the model, then the stats. */
+@media (max-width: 767px) {
+  .hero__grid {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding-top: 124px;
+  }
+  .hero__copy {
+    padding-bottom: 8px;
+  }
+  .hero__lede {
+    max-width: 44ch;
+  }
+  .hero__stage {
+    align-self: center;
+    height: min(72svh, 560px);
+    margin-top: 12px;
+  }
+  .hero__stats {
+    justify-content: space-between;
+    padding-top: 16px;
+    padding-bottom: 20px;
+  }
+  .hero__ticker {
+    display: block;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+}

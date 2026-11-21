@@ -1,28 +1,63 @@
+/* A zero-height sticky strip: the white pill bar floats over whatever scrolls beneath it. */
 .header {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: var(--bg);
-  height: var(--header-h);
-  padding-inline: var(--gutter);
+  height: 0;
+}
+
+.header__bar {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  translate: -50% 0;
+  width: min(100% - 2 * var(--gutter), 1400px);
+  min-height: 60px;
+  padding: 0 10px 0 18px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 24px;
-  border-bottom: 1px solid var(--line);
+  gap: 16px;
+  border-radius: var(--pill);
+  background: rgb(255 255 255 / 0.9);
+  backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 14px 40px -14px rgb(0 0 0 / 0.22);
 }
 
 .header__brand {
   justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header__mark {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.header__mark::after {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.header__word {
   font-weight: 700;
-  font-size: 18px;
+  font-size: 16px;
   letter-spacing: 0.22em;
 }
 
 .header__nav {
   display: flex;
-  gap: 4px;
-  font-size: 14px;
+  gap: 2px;
+  font-size: 13px;
 }
 
 .header__nav a {
@@ -40,69 +75,69 @@
 }
 
 .header__nav a[aria-current] {
-  color: var(--ink);
-  background: var(--surface);
-  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--surface);
+  background: var(--ink);
 }
 
 .header__tools {
   justify-self: end;
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 20px; /* icon size */
+  gap: 6px;
 }
 
-.header__search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 44px 0 14px;
-  margin-right: 8px;
-  border-radius: var(--pill);
-  background: var(--surface);
-  box-shadow: inset 0 0 0 1px var(--line);
+.header__cur {
+  margin-right: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   color: var(--muted);
-  font-size: 14px;
-}
-
-.header__search svg {
-  font-size: 18px;
 }
 
 .header__icon {
-  position: relative;
   display: grid;
   place-items: center;
   width: 40px;
   height: 40px;
   border-radius: var(--pill);
+  font-size: 19px;
   transition: background-color var(--quick);
 }
-
 .header__icon:hover {
-  background: var(--surface);
+  background: var(--bg);
+}
+
+.header__bag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 6px 0 18px;
+  border-radius: var(--pill);
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  transition: transform var(--quick) var(--ease);
+}
+.header__bag:hover {
+  transform: translateY(-1px);
 }
 
 .header__count {
-  position: absolute;
-  top: 2px;
-  right: 0;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
   border-radius: var(--pill);
   background: var(--accent);
   color: var(--on-accent);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 18px;
-  text-align: center;
-}
-
-/* A pop each time the count changes (keyed in Header.tsx). */
-.header__count {
+  font-size: 12px;
+  /* A pop each time the count changes (keyed in Header.tsx). */
   animation: count-pop 420ms var(--ease);
 }
 
@@ -112,35 +147,31 @@
   }
 }
 
-/* Phone: the nav drops to its own scrollable row, search shrinks to an icon. */
-@media (max-width: 767px) {
-  .header {
-    height: auto;
+@media (max-width: 1099px) {
+  .header__drop,
+  .header__cur {
+    display: none;
+  }
+}
+
+/* Phone and small tablet: the nav drops to its own scrollable row under the bar. */
+@media (max-width: 899px) {
+  .header__bar {
     grid-template-columns: 1fr auto;
     row-gap: 0;
-    padding-top: 10px;
+    padding: 8px 8px 6px 14px;
+    border-radius: 30px;
   }
 
   .header__nav {
     grid-column: 1 / -1;
     grid-row: 2;
-    margin-inline: calc(var(--gutter) * -1);
-    padding: 8px var(--gutter);
+    margin-inline: -6px;
+    padding: 4px 6px;
     overflow-x: auto;
     scrollbar-width: none;
   }
-
-  .header__search {
-    width: 40px;
-    padding: 0;
-    margin: 0;
-    justify-content: center;
-    font-size: 0; /* hides the word, the icon keeps its own size */
-    background: none;
-    box-shadow: none;
-  }
-
-  .header__search svg {
-    font-size: 20px;
+  .header__nav::-webkit-scrollbar {
+    display: none;
   }
 }

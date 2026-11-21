@@ -166,7 +166,12 @@ export function FittingRoom({ onAddToBag }: { onAddToBag: (item: NewItem) => voi
     >
       <div className="fit__room" inert={open !== null || tryOpen}>
         <div className="fit__bar">
-          <h2 className="fit__title">Fitting Room</h2>
+          <div className="fit__heading">
+            <p className="eyebrow">Mix and match</p>
+            <h2 className="fit__title h-section">
+              Fitting <span className="h-grey">Room</span>
+            </h2>
+          </div>
           <div className="fit__models" role="group" aria-label="Model">
             {FIT_MODELS.map((m) => (
               <button key={m.id} type="button" aria-pressed={m.id === modelId} onClick={() => setModelId(m.id)}>

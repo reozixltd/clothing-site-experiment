@@ -73,7 +73,8 @@ export function Shoes({ onAddToBag }: { onAddToBag: (item: NewItem) => void }) {
       </div>
 
       <div className="shoes__info" key={shoe.id}>
-        <h2 className="shoes__name">{shoe.name}</h2>
+        <p className="eyebrow">Footwear</p>
+        <h2 className="shoes__name h-section">{shoe.name}</h2>
         <p className="shoes__price">{formatPrice(shoe.price)}</p>
         {open ? (
           <>

@@ -125,36 +125,41 @@
 
 .shoes__name {
   font-size: clamp(28px, 3.6vw, 52px);
-  font-weight: 700;
-  line-height: 0.95;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
+  line-height: 0.98;
 }
 
 .shoes__price {
-  font-size: 15px;
-  color: var(--muted);
+  font-size: 18px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
 .shoes__view {
   height: 40px;
   padding: 0 20px;
-  border: 1px solid var(--ink);
   border-radius: var(--pill);
-  font-size: 13px;
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   transition:
     background-color var(--quick),
     color var(--quick);
 }
 
 .shoes__view:hover {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .shoes__hint {
-  font-size: 13px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--muted);
 }
 
@@ -166,7 +171,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 13px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -177,15 +184,18 @@
   place-items: center;
   width: 40px;
   height: 40px;
-  border: 1px solid var(--line);
   border-radius: var(--pill);
-  color: var(--ink);
-  transition: border-color var(--quick);
+  background: var(--ink);
+  color: var(--surface);
+  transition:
+    background-color var(--quick),
+    color var(--quick);
 }
 
 .shoes__nav button:hover,
 .shoes__close:hover {
-  border-color: var(--ink);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .shoes__close {
@@ -208,7 +218,7 @@
   width: 56px;
   padding: 4px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   transition: border-color var(--quick);
 }
 
@@ -218,6 +228,7 @@
 
 .shoes__thumbs button[aria-pressed='true'] {
   border-color: var(--ink);
+  background: var(--accent);
 }
 
 .shoes__thumbs img {
