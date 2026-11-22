@@ -1,5 +1,5 @@
 import { MagnifyingGlass } from '@phosphor-icons/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './Header.css';
 
 // The sections of the one page, in the order they sit in the nav.
@@ -13,7 +13,7 @@ const NAV = [
   { id: 'contact', label: 'Contact' },
 ];
 
-export function Header({ bagCount, onOpenBag }: { bagCount: number; onOpenBag: () => void }) {
+export function Header({ bagCount, onOpenBag, view }: { bagCount: number; onOpenBag: () => void; view: string }) {
   // The section filling the middle of the screen is the current page.
   const [page, setPage] = useState('home');
   useEffect(() => {
@@ -21,13 +21,26 @@ export function Header({ bagCount, onOpenBag }: { bagCount: number; onOpenBag: (
       (entries) => entries.forEach((e) => e.isIntersecting && setPage(e.target.id)),
       { rootMargin: '-50% 0px' },
     );
-    // Not every section exists in every view (the checkout has none of them).
+    // Not every section exists in every view (the checkout has none of them, so nothing is lit).
+    // Re-run per view: coming back from the checkout mounts fresh section elements.
+    setPage(view === 'shop' ? 'home' : '');
+    if (view !== 'shop') return;
     NAV.forEach((s) => {
       const el = document.getElementById(s.id);
       if (el) io.observe(el);
     });
     return () => io.disconnect();
-  }, []);
+  }, [view]);
+
+  // On a phone the nav is a sideways-scrolling row: keep the lit link in sight.
+  const navRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nav = navRef.current;
+    const a = nav?.querySelector<HTMLElement>('[aria-current]');
+    if (!nav || !a || nav.scrollWidth <= nav.clientWidth) return;
+    const left = a.getBoundingClientRect().left - nav.getBoundingClientRect().left + nav.scrollLeft;
+    nav.scrollTo({ left: left - (nav.clientWidth - a.offsetWidth) / 2, behavior: 'smooth' });
+  }, [page]);
 
   return (
     <header className="header">
@@ -38,7 +51,7 @@ export function Header({ bagCount, onOpenBag }: { bagCount: number; onOpenBag: (
           <span className="tag header__drop">Drop 04</span>
         </a>
 
-        <nav className="header__nav" aria-label="Primary">
+        <nav className="header__nav" aria-label="Primary" ref={navRef}>
           {NAV.map((s) => (
             <a key={s.id} href={`#${s.id}`} aria-current={s.id === page ? 'page' : undefined}>
               {s.label}

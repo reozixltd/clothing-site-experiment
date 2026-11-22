@@ -606,7 +606,11 @@
     margin-block: 8px;
   }
 
+  /* Cover the model only: the floor also holds the rows, which need the finger for swiping. */
   .fit__stagehit {
+    top: 8px;
+    bottom: auto;
+    height: min(68dvh, 560px);
     left: 28%;
     width: 44%;
   }

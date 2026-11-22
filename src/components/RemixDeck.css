@@ -164,7 +164,7 @@
   background: var(--accent);
   color: var(--on-accent);
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -294,7 +294,7 @@
   border-radius: 6px;
   background: var(--bg);
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
@@ -352,7 +352,7 @@
 }
 .remix__foot .eyebrow {
   color: var(--on-dark-muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 .remix__total {
   display: flex;

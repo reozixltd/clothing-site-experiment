@@ -56,15 +56,14 @@ export function Checkout({ cart, onQty, onBack, onPlaced }: Props) {
     e.preventDefault();
     if (!e.currentTarget.reportValidity()) return;
     setDone({ no: `HLD-${Math.floor(10000 + Math.random() * 90000)}`, total: t.total, count: cartCount(cart) });
+    onPlaced(); // the order is in: empty the bag now, the confirmation keeps its own copy
     window.scrollTo({ top: 0 });
   };
 
-  const leave = () => {
-    onPlaced();
-    onBack();
-  };
+  const leave = onBack;
 
-  const step = done ? 3 : 1;
+  // 02 lights once the delivery details are in.
+  const step = done ? 3 : f.name && f.email && f.street && f.city && f.zip ? 2 : 1;
   const input = (k: keyof Form, label: string, o: { req?: boolean; type?: string; ph?: string; auto?: string; mode?: 'numeric' } = {}) => (
     <label className="ck__field">
       <span className="eyebrow">
@@ -215,7 +214,7 @@ export function Checkout({ cart, onQty, onBack, onPlaced }: Props) {
                     <span className="ck__thumb">{l.image && <img src={l.image} alt="" />}</span>
                     <div className="ck__lineinfo">
                       <p>{l.name}</p>
-                      <p className="ck__meta">{l.size ? `Size ${l.size}` : 'One size'}</p>
+                      {l.size && <p className="ck__meta">Size {l.size}</p>}
                       <b>{formatPrice(l.price * l.qty)}</b>
                     </div>
                     <div className="ck__lineact">

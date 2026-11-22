@@ -205,7 +205,7 @@
 }
 .drop__box small {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--on-dark-muted);

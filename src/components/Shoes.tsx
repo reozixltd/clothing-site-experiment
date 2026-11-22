@@ -103,7 +103,7 @@ export function Shoes({ onAddToBag }: { onAddToBag: (item: NewItem) => void }) {
             <button className="shoes__view" type="button" onClick={() => setOpen(true)}>
               View shoe
             </button>
-            <p className="shoes__hint">Scroll to browse. Click a shoe to open it.</p>
+            <p className="shoes__hint">Scroll or swipe to browse. Tap a shoe to open it.</p>
           </>
         )}
       </div>

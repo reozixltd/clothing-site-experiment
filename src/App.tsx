@@ -62,7 +62,7 @@ export function App() {
 
   return (
     <>
-      <Header bagCount={cartCount(cart)} onOpenBag={() => setBagOpen(true)} />
+      <Header bagCount={cartCount(cart)} onOpenBag={() => setBagOpen(true)} view={checkout ? 'checkout' : 'shop'} />
       {checkout ? (
         <main>
           <Checkout cart={cart} onQty={onQty} onBack={() => (location.hash = '')} onPlaced={() => setCart([])} />

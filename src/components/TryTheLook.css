@@ -322,7 +322,7 @@
   border-radius: 6px;
   background: var(--bg);
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);

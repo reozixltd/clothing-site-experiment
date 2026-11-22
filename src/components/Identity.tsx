@@ -141,7 +141,7 @@ export function Identity() {
             return (
               <div key={i} className="identity__card" ref={(el) => void (cards.current[i] = el)} aria-hidden={i >= IMAGES || undefined}>
                 {broken.includes(n) ? null : (
-                  <img src={`/editorial/${n}.webp`} alt={i < IMAGES ? `Editorial portrait ${n}` : ''} draggable={false} loading="lazy" onError={() => setBroken((b) => [...b, n])} />
+                  <img src={`/editorial/${n}.webp`} alt={i < IMAGES ? `Editorial portrait ${n}` : ''} draggable={false} onError={() => setBroken((b) => [...b, n])} />
                 )}
               </div>
             );
